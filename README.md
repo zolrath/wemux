@@ -16,7 +16,7 @@ Clients have the option of:
 
 Move or symlink the `wemux` file to the path such as `/usr/local/bin/`
 
-    ln -s /Users/zolrath/.wemux/wemux /usr/local/bin/wemux
+    ln -s /Users/YOUR_USER_NAME/.wemux/wemux /usr/local/bin/wemux
 
 Add the following to the host accounts .bash_profile or .zshrc
 
