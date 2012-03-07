@@ -57,7 +57,7 @@ to the users .bash_profile or .zshrc
 
 **Option 1**: Automatically log the client into mirror mode upon login, disconnect them from the server when they detach.
 
-    wemux mirror && exit
+    wemux mirror; exit
 
 **Option 2**: Automatically start the client in mirror mode but allow them to detach.
 
