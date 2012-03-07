@@ -26,7 +26,7 @@ see you work, or
 
   Add the following to the host accounts `.bash_profile` or `.zshrc`
 
-    export WEMUX_HOST = true
+    export WEMUX_HOST=true
 
 ## Host Commands
 #### wemux start
@@ -62,7 +62,7 @@ see you work, or
 To have an account act as host, ensure that you have added the following line
 to the `.bash_profile` or `.zshrc`
 
-    export WEMUX_HOST = true
+    export WEMUX_HOST=true
 
 ### Client Modes
 
