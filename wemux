@@ -1,0 +1,121 @@
+#!/bin/sh
+# wemux server by Matt Furden @zolrath
+# wemux allows you to start a shared tmux session using the command 'wemux'.
+# Clients have the option of mirroring, which will give them read-only access,
+# or pairing, which will allow them to edit your file (shared cursor) or work
+# in another window (separate cursors) in the hosts tmux session.
+#
+#wemux: Start the wemux session/join an exist wemux session.
+#wemux start: Start the wemux session/join an exist wemux session.
+#wemux stop: Stop the wemux session, delete the session file.
+#wemux help: Display the help screen.
+
+name=`whoami`
+tmux="tmux -S /tmp/wemux"
+
+if [ "$WEMUX_HOST" == true ]; then
+  # Host mode
+  start_server(){
+  if ! $tmux has-session -t Host 2>/dev/null; then
+    $tmux new-session -d -s Host
+    chmod 1777 /tmp/wemux
+  fi
+  reattach
+  }
+
+  reattach(){
+    $tmux display-message "$name has reattached"
+    $tmux attach -t Host
+  }
+
+  stop_server(){
+    if $tmux server-info >/dev/null 2>&1; then
+      $tmux kill-server
+      echo "wemux server killed."
+    else
+      echo "No wemux server running."
+    fi
+    if [ -e /tmp/wemux ]; then
+      if rm /tmp/wemux; then
+        echo "Removed /tmp/wemux"
+      else
+        echo "Could not remove /tmp/wemux. Please check file ownership."
+      fi
+    else
+      echo "The wemux session file /tmp/wemux does not exist."
+    fi
+  }
+
+  display_host_commands() {
+    echo "To host a wemux session please use one of the following:"
+    echo "    start:   Start the wemux session/join an existing wemux session."
+    echo "    stop:    Kill the wemux session, delete the session file."
+    echo "    no args: The same as calling start."
+    echo "    help:    Display this screen."
+  }
+
+  if [ -z "$1" ]; then
+    start_server
+  else
+    case "$1" in
+      start) start_server;;
+      stop) stop_server;;
+      kill) stop_server;;
+      help) display_host_commands;;
+      *) display_host_commands;;
+    esac
+  fi
+else
+  # Client mode
+  mirror_mode() {
+    if $tmux has-session -t Host >/dev/null 2>&1; then
+      $tmux display-message "$name has connected in mirror mode."
+      $tmux attach -t Host -r
+    else
+      echo "No wemux session to mirror."
+    fi
+  }
+
+  pair_mode() {
+    if $tmux has-session -t $name >/dev/null 2>&1; then
+      $tmux display-message "$name has reattached to pair mode."
+      $tmux attach -t $name
+    elif $tmux has-session -t Host >/dev/null 2>&1; then
+      $tmux display-message "$name has connected in pair mode."
+      $tmux new-session -d -t Host -s $name
+      $tmux new-window -n $name
+      $tmux attach -t $name
+    else
+      echo "No wemux session to pair to."
+    fi
+  }
+
+  smart_reattach() {
+    if $tmux has-session -t $name >/dev/null 2>&1; then
+      $tmux display-message "$name has reattached to pair mode."
+      $tmux attach -t $name
+    elif $tmux has-session -t Host >/dev/null 2>&1; then
+      $tmux display-message "$name has connected in mirror mode."
+      $tmux attach -t Host -r
+    else
+      "No wemux session to connect to."
+    fi
+
+  }
+  display_client_commands() {
+    echo "To connect to wemux please use one of the following:"
+    echo "    mirror : Attach to Host in read-only mode."
+    echo "    pair   : Attach to Host in pair mode, which allows editing."
+    echo "    no args: Attach to pair session if it already exists, otherwise mirror."
+  }
+  if [ -z "$1" ]; then
+    smart_reattach
+  else
+    case "$1" in
+      mirror) mirror_mode;;
+      pair) pair_mode;;
+      help) display_client_commands;;
+      *) display_client_commands;;
+    esac
+  fi
+fi

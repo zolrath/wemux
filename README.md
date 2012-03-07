@@ -1,0 +1,75 @@
+# wemux: Multi-User Tmux Sessions Made Easy
+***
+wemux allows you to start hosting a multi-user tmux session using the command `wemux`.
+
+Clients have the option of:
+
+**Mirroring**, which will give clients read-only access, allowing them to see you work, or
+
+**Pairing**, which will allow the client and yourself to work in the same terminal (shared cursor)
+  or work independently in another window (separate cursors) in the same tmux session.
+
+## How to use
+  Git clone this repo to your desired location.
+
+    git clone git://github.com/zolrath/wemux.git ~/.wemux
+
+Move or symlink the `wemux` file to the path such as `/usr/local/bin/`
+
+    ln -s /Users/zolrath/.wemux/wemux /usr/local/bin/wemux
+
+Add the following to the host accounts .bash_profile or .zshrc
+
+    export WEMUX_HOST = true
+
+## Host Commands
+#### wemux start
+  Use `wemux start` to start a wemux session, chmoding /tmp/wemux to 1777 and attaching to it.
+  If a wemux session already exists, it will connect to it instead.
+#### wemux stop
+  Use `wemux stop` to kill the wemux session, removing the /tmp/wemux session file.
+#### wemux
+  When `wemux` is run without any arguments in host mode, it is just like running wemux start.
+  It will reattach to an existing wemux session if it exists, otherwise it will start a new session.
+
+## Client Commands
+  All client commands notify the wemux session host that the user has attached, and in what mode.
+#### wemux mirror
+  Use `wemux mirror` to attach to Host in read-only mode.
+#### wemux pair
+  Use `wemux pair` to attach to Host in pair mode, which allows editing.
+#### wemux
+  When `wemux` is run without any arguments in client mode, its behavior attempts to intelligently select mirror or pair:
+
+  * If the user has not run wemux pair and no pair sessions exist, then it will attach to the wemux session in mirror mode.
+  * If the user has already started a wemux pair mode session, it will reattach to the session in pair mode.
+
+## Configuration
+### Host Mode
+Ensure that you have added the following line to your .bash_profile or .zshrc
+
+    export WEMUX_HOST = true
+
+### Client Modes
+
+To start a sshed user in wemux automatically, add one of the following lines
+to the users .bash_profile or .zshrc
+
+**Option 1**: Automatically log the client into mirror mode upon login, disconnect them from the server when they detach.
+
+    wemux mirror && exit
+
+**Option 2**: Automatically start the client in mirror mode but allow them to detach.
+
+    wemux mirror
+
+**Option 3**: Automatically start the client in pair mode but allow them to detach.
+
+    wemux pair
+
+**Option 4**: Only display the connection commands, don't automatically start any modes.
+
+    wemux help
+
+Please note that this does not ensure a logged in user will not be able to exit tmux and access their
+shell. If the user is not trusted, you must perform any security measures one would normally perform for a remote user.
