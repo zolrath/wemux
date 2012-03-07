@@ -1,20 +1,33 @@
 #!/bin/sh
-# wemux server by Matt Furden @zolrath
+# wemux by Matt Furden @zolrath
+# version 1.0.0
+#
 # wemux allows you to start a shared tmux session using the command 'wemux'.
 # Clients have the option of mirroring, which will give them read-only access,
 # or pairing, which will allow them to edit your file (shared cursor) or work
 # in another window (separate cursors) in the hosts tmux session.
 #
-#wemux: Start the wemux session/join an exist wemux session.
-#wemux start: Start the wemux session/join an exist wemux session.
-#wemux stop: Stop the wemux session, delete the session file.
-#wemux help: Display the help screen.
+# To set a user as host add the following line to their .bash_profile or .zshrc
+# export WEMUX_HOST = true
+#
+# WEMUX HOST COMMANDS:
+# wemux start : Start the wemux session/join an exist wemux session.
+# wemux stop  : Stop the wemux session, delete the session file.
+# wemux help  : Display the help screen.
+#
+# WEMUX CLIENT COMMANDS:
+# wemux mirror: Attach to Host in read-only mode.
+# wemux pair  : Attach to Host in pair mode, which allows editing.
+# wemux help  : Display the help screen.
 
+# Set $name to name of current user.
 name=`whoami`
+# Set $tmux to wemux session file.
 tmux="tmux -S /tmp/wemux"
 
-if [ "$WEMUX_HOST" == true ]; then
-  # Host mode
+# Host mode, used when user has the env variable $WEMUX_HOST set to true.
+host_mode() {
+  # Start the server if it doesn't exist, otherwise reattach.
   start_server(){
   if ! $tmux has-session -t Host 2>/dev/null; then
     $tmux new-session -d -s Host
@@ -23,11 +36,13 @@ if [ "$WEMUX_HOST" == true ]; then
   reattach
   }
 
+  # Reattach to the wemux session.
   reattach(){
     $tmux display-message "$name has reattached"
     $tmux attach -t Host
   }
 
+  # Stop the wemux session and remove the /tmp/wemux file.
   stop_server(){
     if $tmux server-info >/dev/null 2>&1; then
       $tmux kill-server
@@ -46,6 +61,7 @@ if [ "$WEMUX_HOST" == true ]; then
     fi
   }
 
+  # Display the commands available in host mode.
   display_host_commands() {
     echo "To host a wemux session please use one of the following:"
     echo "    start:   Start the wemux session/join an existing wemux session."
@@ -54,6 +70,8 @@ if [ "$WEMUX_HOST" == true ]; then
     echo "    help:    Display this screen."
   }
 
+  # Host mode command handling:
+  # If no command given, call start server.
   if [ -z "$1" ]; then
     start_server
   else
@@ -65,8 +83,11 @@ if [ "$WEMUX_HOST" == true ]; then
       *) display_host_commands;;
     esac
   fi
-else
-  # Client mode
+}
+
+# Client Mode, used whenever $WEMUX_HOST is not set.
+client_mode() {
+  # Mirror mode, allows the user to view wemux session in read only mode.
   mirror_mode() {
     if $tmux has-session -t Host >/dev/null 2>&1; then
       $tmux display-message "$name has connected in mirror mode."
@@ -76,6 +97,8 @@ else
     fi
   }
 
+  # Pair mode, allows user to interact with wemux session.
+  # Will connect to existing pair session or create one if necessary.
   pair_mode() {
     if $tmux has-session -t $name >/dev/null 2>&1; then
       $tmux display-message "$name has reattached to pair mode."
@@ -90,6 +113,9 @@ else
     fi
   }
 
+  # Reattach based upon presence of existing pair mode session.
+  # If pair mode session exists, reattach to it.
+  # If no pair mode session exists, mirror the host.
   smart_reattach() {
     if $tmux has-session -t $name >/dev/null 2>&1; then
       $tmux display-message "$name has reattached to pair mode."
@@ -102,12 +128,17 @@ else
     fi
 
   }
+
+  # Display the commands available in client mode.
   display_client_commands() {
     echo "To connect to wemux please use one of the following:"
     echo "    mirror : Attach to Host in read-only mode."
     echo "    pair   : Attach to Host in pair mode, which allows editing."
     echo "    no args: Attach to pair session if it already exists, otherwise mirror."
   }
+
+  # Client mode command handling:
+  # If no command given, call smart_reattach
   if [ -z "$1" ]; then
     smart_reattach
   else
@@ -118,4 +149,11 @@ else
       *) display_client_commands;;
     esac
   fi
+}
+
+# Activate either Host or Client mode depending on WEMUX_HOST variable.
+if [ "$WEMUX_HOST" == true ]; then
+  host_mode $1
+else
+  client_mode $1
 fi
