@@ -1,6 +1,7 @@
 #!/bin/sh
-# wemux by Matt Furden @zolrath
+# wemux-linux by Matt Furden @zolrath
 # version 1.0.1
+# Linux version removes stderr redirection until tmux/epoll error is fixed.
 #
 # wemux allows you to start a shared tmux session using the command 'wemux'.
 # Clients have the option of mirroring, which will give them read-only access,
@@ -27,7 +28,7 @@ tmux="tmux -S /tmp/wemux"
 host_mode() {
   # Start the server if it doesn't exist, otherwise reattach.
   start_server() {
-    if ! $tmux has-session -t Host 2>/dev/null; then
+    if ! $tmux has-session -t Host; then
       $tmux new-session -d -s Host
       chmod 1777 /tmp/wemux
     fi
@@ -88,7 +89,7 @@ host_mode() {
 client_mode() {
   # Mirror mode, allows the user to view wemux session in read only mode.
   mirror_mode() {
-    if $tmux has-session -t Host >/dev/null 2>&1; then
+    if $tmux has-session -t Host; then
       $tmux display-message "$USER has attached in mirror mode."
       $tmux attach -t Host -r
       $tmux display-message "$USER has detached."
@@ -100,11 +101,11 @@ client_mode() {
   # Pair mode, allows user to interact with wemux session.
   # Will connect to existing pair session or create one if necessary.
   pair_mode() {
-    if $tmux has-session -t $USER >/dev/null 2>&1; then
+    if $tmux has-session -t $USER; then
       $tmux display-message "$USER has reattached in pair mode."
       $tmux attach -t $USER
       $tmux display-message "$USER has detached."
-    elif $tmux has-session -t Host >/dev/null 2>&1; then
+    elif $tmux has-session -t Host; then
       $tmux display-message "$USER has attached in pair mode."
       $tmux new-session -d -t Host -s $USER
       $tmux new-window -n $USER
@@ -119,11 +120,11 @@ client_mode() {
   # If pair mode session exists, reattach to it.
   # If no pair mode session exists, mirror the host.
   smart_reattach() {
-    if $tmux has-session -t $USER >/dev/null 2>&1; then
+    if $tmux has-session -t $USER; then
       $tmux display-message "$USER has reattached in pair mode."
       $tmux attach -t $USER
       $tmux display-message "$USER has detached."
-    elif $tmux has-session -t Host >/dev/null 2>&1; then
+    elif $tmux has-session -t Host; then
       $tmux display-message "$USER has attached in mirror mode."
       $tmux attach -t Host -r
       $tmux display-message "$USER has detached."
