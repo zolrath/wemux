@@ -128,7 +128,7 @@ client_mode() {
       $tmux attach -t Host -r
       $tmux display-message "$USER has detached."
     else
-      "No wemux session to attach to."
+      echo "No wemux session to attach to."
     fi
   }
 
