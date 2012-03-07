@@ -28,31 +28,32 @@ tmux="tmux -S /tmp/wemux"
 # Host mode, used when user has the env variable $WEMUX_HOST set to true.
 host_mode() {
   # Start the server if it doesn't exist, otherwise reattach.
-  start_server(){
-  if ! $tmux has-session -t Host 2>/dev/null; then
-    $tmux new-session -d -s Host
-    chmod 1777 /tmp/wemux
-  fi
-  reattach
+  start_server() {
+    if ! $tmux has-session -t Host 2>/dev/null; then
+      $tmux new-session -d -s Host
+      chmod 1777 /tmp/wemux
+    fi
+    reattach
   }
 
   # Reattach to the wemux session.
-  reattach(){
-    $tmux display-message "$name has reattached"
+  reattach() {
+    $tmux display-message "$name has reattached."
     $tmux attach -t Host
+    $tmux display-message "$name has detached."
   }
 
   # Stop the wemux session and remove the /tmp/wemux file.
-  stop_server(){
+  stop_server() {
     if $tmux server-info >/dev/null 2>&1; then
       $tmux kill-server
-      echo "wemux server killed."
+      echo "wemux server stopped."
     else
       echo "No wemux server running."
     fi
     if [ -e /tmp/wemux ]; then
       if rm /tmp/wemux; then
-        echo "Removed /tmp/wemux"
+        echo "Removed /tmp/wemux."
       else
         echo "Could not remove /tmp/wemux. Please check file ownership."
       fi
@@ -90,8 +91,9 @@ client_mode() {
   # Mirror mode, allows the user to view wemux session in read only mode.
   mirror_mode() {
     if $tmux has-session -t Host >/dev/null 2>&1; then
-      $tmux display-message "$name has connected in mirror mode."
+      $tmux display-message "$name has attached in mirror mode."
       $tmux attach -t Host -r
+      $tmux display-message "$name has detached."
     else
       echo "No wemux session to mirror."
     fi
@@ -101,15 +103,17 @@ client_mode() {
   # Will connect to existing pair session or create one if necessary.
   pair_mode() {
     if $tmux has-session -t $name >/dev/null 2>&1; then
-      $tmux display-message "$name has reattached to pair mode."
+      $tmux display-message "$name has reattached in pair mode."
       $tmux attach -t $name
+      $tmux display-message "$name has detached."
     elif $tmux has-session -t Host >/dev/null 2>&1; then
-      $tmux display-message "$name has connected in pair mode."
+      $tmux display-message "$name has attached in pair mode."
       $tmux new-session -d -t Host -s $name
       $tmux new-window -n $name
       $tmux attach -t $name
+      $tmux display-message "$name has detached."
     else
-      echo "No wemux session to pair to."
+      echo "No wemux session to pair with."
     fi
   }
 
@@ -118,15 +122,16 @@ client_mode() {
   # If no pair mode session exists, mirror the host.
   smart_reattach() {
     if $tmux has-session -t $name >/dev/null 2>&1; then
-      $tmux display-message "$name has reattached to pair mode."
+      $tmux display-message "$name has reattached in pair mode."
       $tmux attach -t $name
+      $tmux display-message "$name has detached."
     elif $tmux has-session -t Host >/dev/null 2>&1; then
-      $tmux display-message "$name has connected in mirror mode."
+      $tmux display-message "$name has attached in mirror mode."
       $tmux attach -t Host -r
+      $tmux display-message "$name has detached."
     else
-      "No wemux session to connect to."
+      "No wemux session to attach to."
     fi
-
   }
 
   # Display the commands available in client mode.
