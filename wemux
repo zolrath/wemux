@@ -65,10 +65,10 @@ host_mode() {
   # Display the commands available in host mode.
   display_host_commands() {
     echo "To host a wemux session please use one of the following:"
-    echo "    start:   Start the wemux session/join an existing wemux session."
-    echo "    stop:    Kill the wemux session, delete the session file."
-    echo "    no args: The same as calling start."
-    echo "    help:    Display this screen."
+    echo "    [s]  start: Start the wemux session/join an existing wemux session."
+    echo "    [k]   stop: Kill the wemux session, delete the session file."
+    echo "    [h]   help: Display this screen."
+    echo "       no args: Start the wemux session/join an existing wemux session."
   }
 
   # Host mode command handling:
@@ -77,11 +77,12 @@ host_mode() {
     start_server
   else
     case "$1" in
-      start) start_server;;
-      stop) stop_server;;
-      kill) stop_server;;
-      help) display_host_commands;;
-      *) display_host_commands;;
+      start|s) start_server;;
+      stop|st) stop_server;;
+      kill|k)  stop_server;;
+      help|h)  display_host_commands;;
+      *)       echo "Sorry, we don't understand: $1"
+               display_host_commands;;
     esac
   fi
 }
@@ -137,9 +138,10 @@ client_mode() {
   # Display the commands available in client mode.
   display_client_commands() {
     echo "To connect to wemux please use one of the following:"
-    echo "    mirror : Attach to Host in read-only mode."
-    echo "    pair   : Attach to Host in pair mode, which allows editing."
-    echo "    no args: Attach to pair session if it already exists, otherwise mirror."
+    echo "    [m] mirror: Attach to Host in read-only mode."
+    echo "    [p]   pair: Attach to Host in pair mode, which allows editing."
+    echo "    [h]   help: Display this screen."
+    echo "       no args: Attach to pair session if it already exists, otherwise mirror."
   }
 
   # Client mode command handling:
@@ -148,10 +150,13 @@ client_mode() {
     smart_reattach
   else
     case "$1" in
-      mirror) mirror_mode;;
-      pair) pair_mode;;
-      help) display_client_commands;;
-      *) display_client_commands;;
+      mirror|m) mirror_mode;;
+      read|r)   mirror_mode;;
+      pair|p)   pair_mode;;
+      edit|e)   pair_mode;;
+      help|h)   display_client_commands;;
+      *)        echo "Sorry, we don't understand: $1"
+                display_client_commands;;
     esac
   fi
 }
