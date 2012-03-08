@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # wemux by Matt Furden @zolrath
 # version 1.0.1
 #
@@ -30,6 +30,7 @@ host_mode() {
     if ! $wemux has-session -t Host 2>/dev/null; then
       $wemux new-session -d -s Host
       chmod 1777 /tmp/wemux
+      echo "wemux server started."
     fi
     reattach
   }
@@ -158,9 +159,14 @@ client_mode() {
   fi
 }
 
-# Activate either Host or Client mode depending on WEMUX_HOST variable.
-if [ "$WEMUX_HOST" == true ]; then
-  host_mode $1
+# Don't allow wemux to be run directly within a wemux session.
+if [[ "$TMUX" != *wemux* ]]; then
+  # Activate either Host or Client mode depending on WEMUX_HOST variable.
+  if [ "$WEMUX_HOST" == true ]; then
+    host_mode $1
+  else
+    client_mode $1
+  fi
 else
-  client_mode $1
+  echo "wemux does not allow nesting wemux sessions directly."
 fi
