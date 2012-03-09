@@ -8,8 +8,7 @@ host_list=(root)
 
 # Location of tmux socket:
 # socket="/tmp/wemux"
-socket="/tmp/wemux"
 
 # Tmux Options:
 # Defaults to -u to have tmux always attempt to use utf-8 mode.
-options="-u"
+# options="-u"
