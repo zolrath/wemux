@@ -85,27 +85,27 @@ see you work, or
   For a complete list, type `wemux help` (or `wemux h`)
 
 ## Multi-Host Capabilities
-  wemux supports passing a second argument to its commands to specify a specific
-  session hostname. This allows multiple hosts on the same machine to host their
-  own independent wemux sessions with their own clients.
+  wemux supports specifying a specific session hostname. This allows multiple
+  hosts on the same machine to host their own independent wemux sessions with
+  their own clients.
 
   This is not needed for most use cases.
 
-  wemux will remember the last host attached to in order to make reconnecting to
-  the same hostname easy. `wemux help` will output the currently specified
+  wemux will remember the last host specified to in order to make reconnecting
+  to the same hostname easy. `wemux help` will output the currently specified
   hostname along with the wemux command list.
 
 ### Specifying Hostname
-  All the commands you know and love will accept an optional second argument of
-  the hostname you would like to start/attach/mirror/pair to.
-
-    wemux start ProjectX
-    wemux attach ProjectX
-    wemux stop ProjectX
-    wemux mirror ProjectX
-    wemux pair ProjectX
-    wemux logout ProjectX
+  To change the wemux hostname run `wemux host HOSTNAME`
+    wemux host ProjectX
+    # wemux hostname is now ProjectX
+    wemux start
+    wemux attach
+    wemux stop
     wemux reset
+    # wemux hostname is now host
+#### wemux host <name>
+    Changes wemux hostname to specified name.
 
 ### Resetting the Hostname
   In order to easily return to the default hostname you can run `wemux reset`
