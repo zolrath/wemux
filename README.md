@@ -42,14 +42,14 @@ see you work, or
 
 ## Host Commands
 #### wemux start
-  Use `wemux start` to start a wemux session, chmod /tmp/wemux to 1777 and
+  Use `wemux start` to start a wemux session, chmod /tmp/wemux-host to 1777 and
   attach to it.  If a wemux session already exists, it will attach to it
   instead.
 #### wemux attach
   Use `wemux attach` to join an existing wemux session.
 #### wemux stop
-  Use `wemux stop` to kill the wemux session and remove the /tmp/wemux session
-  file.
+  Use `wemux stop` to kill the wemux session and remove the /tmp/wemux-host
+  socket.
 #### wemux
   When `wemux` is run without any arguments in host mode, it is just like
   running wemux start.  It will reattach to an existing wemux session if it
@@ -77,7 +77,7 @@ see you work, or
   wemux passes commands it doesn't understand through to tmux with the correct
   socket setting.
 
-  `wemux list-sessions` is the same as entering `tmux -S /tmp/wemux
+  `wemux list-sessions` is equivalent to entering `tmux -S /tmp/wemux-host
   list-sessions`
 
 ## Short-form Commands
@@ -85,7 +85,7 @@ see you work, or
   For a complete list, type `wemux help` (or `wemux h`)
 
 ## Multi-Host Capabilities
-  wemux supports specifying a specific session hostname via `wemux name
+  wemux supports specifying the wemux session hostname via `wemux name
   <hostname>`. This allows multiple hosts on the same machine to host their own
   independent wemux sessions with their own clients.
 
@@ -96,7 +96,7 @@ see you work, or
   hostname along with the wemux command list.
 
 ### Specifying Hostname
-  To change the wemux hostname run `wemux host HOSTNAME`
+  To change the wemux hostname run `wemux name HOSTNAME`
     wemux name ProjectX
     # wemux hostname is now ProjectX
     wemux start
@@ -104,7 +104,7 @@ see you work, or
     wemux stop
     wemux reset
     # wemux hostname is now host
-#### wemux name <hostname>
+#### wemux name *hostname*
     Changes wemux hostname to specified name.
 
 ### Resetting the Hostname
