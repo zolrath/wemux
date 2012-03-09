@@ -19,7 +19,7 @@ see you work, or
 
     git clone git://github.com/zolrath/wemux.git ~/.wemux
 
-  On OSX use the standard wemux file. On Linux machines use wemux-linux.
+  On OSX use wemux, on Linux machines use wemux-linux.
   wemux-linux removes stderr redirection until tmux/epoll error is fixed.
 
   Move or symlink the `wemux` file into your $PATH such as `/usr/local/bin/`,
@@ -31,10 +31,13 @@ see you work, or
 
     ln -s /Users/YOUR_USER_NAME/.wemux/wemux-linux /usr/local/bin/wemux
 
-  To set a user as host add their username to the host_list array located at the
-  start of code in wemux (or if using wemux-linux, modify code there.)
+  **IMPORTANT**: Copy the wemux.conf.example file to /etc/wemux.conf
 
-    host_list=(furd ottiferous)
+    sudo cp ~/.wemux/wemux.conf.example /etc/wemux.conf
+
+  To set a user as host add their username to the host_list in /etc/wemux.conf
+
+    host_list=(zolrath csagan brocksampson)
 
 
 ## Host Commands
@@ -68,10 +71,10 @@ see you work, or
 
 ## Configuration
 ### Host Mode
-To have an account act as host, ensure that you have added the following line
-to the `.bash_profile` or `.zshrc`
+To have an account act as host, ensure that you have added their username to the
+/etc/wemux.conf file's host_list array.
 
-    export WEMUX_HOST=true
+    host_list=(zolrath hostusername csagan brocksampson)
 
 ### Client Modes
 

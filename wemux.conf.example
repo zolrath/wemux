@@ -1,0 +1,6 @@
+# wemux Configuration:
+#
+# Host List:
+# Add names of users who should use wemux in host mode.
+# host_list=(zolrath csagan brocksamson)
+host_list=(root)

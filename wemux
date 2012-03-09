@@ -7,7 +7,7 @@
 # or pairing, which will allow them to edit your file (shared cursor) or work
 # in another window (separate cursors) in the hosts tmux session.
 #
-# To set a user as host add their username to the host_list array.
+# To set a user as host add their username to the host_list in /etc/wemux.conf
 #
 # WEMUX HOST COMMANDS:
 # wemux start : Start the wemux session/join an exist wemux session.
@@ -21,15 +21,13 @@
 
 ###############################################################################
 
-# Host List:
-# Add names of users who should use wemux in host mode.
-# ex: host_list=(zolrath csagan brocksamson)
-host_list=(furd ottiferous)
+# Get configuration options from /etc/wemux.conf
+source "/etc/wemux.conf"
 
 # Set $wemux to wemux session file.
 wemux="tmux -S /tmp/wemux -u"
 
-# Host mode, used when user is listed in the host_list array.
+# Host mode, used when user is listed in the host_list array in /etc/wemux.conf
 host_mode() {
   # Start the server if it doesn't exist, otherwise reattach.
   start_server() {
@@ -90,7 +88,7 @@ host_mode() {
   fi
 }
 
-# Client Mode, used when user is NOT listed in the host_list array.
+# Client Mode, used when user is NOT listed in the host_list in /etc/wemux.conf
 client_mode() {
   # Mirror mode, allows the user to view wemux session in read only mode.
   mirror_mode() {
@@ -171,6 +169,8 @@ user_is_a_host() {
   done
   return 1
 }
+
+
 
 # Don't allow wemux to be run directly within a wemux session.
 if [[ "$TMUX" != *wemux* ]]; then
