@@ -1,6 +1,6 @@
 #!/bin/bash
 # wemux by Matt Furden @zolrath
-# version 1.1.1
+# version 1.1.2
 #
 # wemux allows you to start a shared tmux session using the command 'wemux'.
 # Clients have the option of mirroring, which will give them read-only access,
@@ -21,15 +21,17 @@
 
 ###############################################################################
 
-# Default host_list in case /etc/wemux.conf doesn't exist:
+# Default settings in case /etc/wemux.conf doesn't exist:
 host_list=(root)
+socket="/tmp/wemux"
+options="-u"
 # Load configuration options from /etc/wemux.conf
 if [ -f /etc/wemux.conf ]; then
   . /etc/wemux.conf
 fi
 
 # Set $wemux to wemux session file.
-wemux="tmux -S /tmp/wemux -u"
+wemux="tmux -S $socket $options"
 
 # Host mode, used when user is listed in the host_list array in /etc/wemux.conf
 host_mode() {
@@ -37,7 +39,7 @@ host_mode() {
   start_server() {
     if ! $wemux has-session -t Host 2>/dev/null; then
       $wemux new-session -d -s Host
-      chmod 1777 /tmp/wemux
+      chmod 1777 $socket
       echo "wemux server started."
     fi
     reattach
@@ -50,21 +52,21 @@ host_mode() {
     $wemux display-message "$USER has detached."
   }
 
-  # Stop the wemux session and remove the /tmp/wemux file.
+  # Stop the wemux session and remove the socket file.
   stop_server() {
     if $wemux kill-server; then
       echo "wemux server stopped."
     else
       echo "No wemux server running."
     fi
-    if [ -e /tmp/wemux ]; then
-      if rm /tmp/wemux; then
-        echo "Removed /tmp/wemux."
+    if [ -e $socket ]; then
+      if rm $socket; then
+        echo "Removed $socket."
       else
-        echo "Could not remove /tmp/wemux. Please check file ownership."
+        echo "Could not remove $socket. Please check file ownership."
       fi
     else
-      echo "The wemux session file /tmp/wemux does not exist."
+      echo "The wemux session file $socket does not exist."
     fi
   }
 
@@ -177,7 +179,7 @@ user_is_a_host() {
 
 
 # Don't allow wemux to be run directly within a wemux session.
-if [[ "$TMUX" != *wemux* ]]; then
+if [[ "$TMUX" != *$socket* ]]; then
   if user_is_a_host; then
     host_mode $1
   else

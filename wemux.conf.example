@@ -1,6 +1,13 @@
 # wemux Configuration:
 #
-# Host List:
 # Add names of users who should use wemux in host mode.
 # host_list=(zolrath csagan brocksamson)
 host_list=(root)
+
+# Location of tmux socket.
+# socket="/tmp/wemux"
+socket="/tmp/wemux"
+
+# Tmux Options:
+# Defaults to -u to have tmux attempt to use utf-8 mode always.
+options="-u"
