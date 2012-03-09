@@ -1,7 +1,7 @@
 #!/bin/bash
 # wemux-linux by Matt Furden @zolrath
-# version 1.1.0
 # Linux version removes stderr redirection until tmux/epoll error is fixed.
+# version 1.1.1
 #
 # wemux allows you to start a shared tmux session using the command 'wemux'.
 # Clients have the option of mirroring, which will give them read-only access,
@@ -22,8 +22,12 @@
 
 ###############################################################################
 
-# Get configuration options from /etc/wemux.conf
-source "/etc/wemux.conf"
+# Default host_list in case /etc/wemux.conf doesn't exist:
+host_list=(root)
+# Load configuration options from /etc/wemux.conf
+if [ -f /etc/wemux.conf ]; then
+  . /etc/wemux.conf
+fi
 
 # Set $wemux to wemux session file.
 wemux="tmux -S /tmp/wemux -u"
