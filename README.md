@@ -85,9 +85,9 @@ see you work, or
   For a complete list, type `wemux help` (or `wemux h`)
 
 ## Multi-Host Capabilities
-  wemux supports specifying a specific session hostname. This allows multiple
-  hosts on the same machine to host their own independent wemux sessions with
-  their own clients.
+  wemux supports specifying a specific session hostname via `wemux name
+  <hostname>`. This allows multiple hosts on the same machine to host their own
+  independent wemux sessions with their own clients.
 
   This is not needed for most use cases.
 
@@ -97,14 +97,14 @@ see you work, or
 
 ### Specifying Hostname
   To change the wemux hostname run `wemux host HOSTNAME`
-    wemux host ProjectX
+    wemux name ProjectX
     # wemux hostname is now ProjectX
     wemux start
     wemux attach
     wemux stop
     wemux reset
     # wemux hostname is now host
-#### wemux host <name>
+#### wemux name <hostname>
     Changes wemux hostname to specified name.
 
 ### Resetting the Hostname
