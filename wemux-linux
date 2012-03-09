@@ -246,9 +246,9 @@ user_is_a_host() {
 if [[ "$TMUX" != *$socket* ]]; then
   # If user is in host list, use host mode. If not, use client mode.
   if user_is_a_host; then
-    host_mode $1 $2
+    host_mode "$@"
   else
-    client_mode $1 $2
+    client_mode "$@"
   fi
 else
   echo "wemux does not allow nesting wemux sessions directly."
