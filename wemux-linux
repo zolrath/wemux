@@ -26,6 +26,7 @@
 host_list=(root)
 socket="/tmp/wemux"
 options="-u"
+
 # Load configuration options from /etc/wemux.conf
 if [ -f /etc/wemux.conf ]; then
   . /etc/wemux.conf
@@ -179,6 +180,7 @@ user_is_a_host() {
 
 # Don't allow wemux to be run directly within a wemux session.
 if [[ "$TMUX" != *$socket* ]]; then
+  # If user is in host list, use host mode. If not, use client mode.
   if user_is_a_host; then
     host_mode $1
   else
