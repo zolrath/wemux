@@ -1,6 +1,6 @@
 #!/bin/bash
 # wemux by Matt Furden @zolrath
-# version 1.2.3
+# version 1.2.4
 #
 # wemux allows you to start a shared tmux session using the command 'wemux'.
 # Clients have the option of mirroring, which will give them read-only access,
@@ -49,7 +49,8 @@ change_host() {
 if [ -f ~/.wemux_last_host ]; then
   host=`cat ~/.wemux_last_host`
 else
-  change_host host
+  host="nothing"
+  change_host "host"
 fi
 
 # Set client's pair mode session name.
@@ -68,7 +69,7 @@ host_mode() {
     if ! $wemux has-session -t $host &>/dev/null; then
       $wemux new-session -d -s $host
       chmod 1777 $socket
-      echo "wemux server started."
+      echo "wemux server started on $host."
     fi
     reattach
   }
@@ -87,9 +88,9 @@ host_mode() {
   # Stop the wemux session and remove the socket file.
   stop_server() {
     if $wemux kill-server &>/dev/null; then
-      echo "wemux server stopped."
+      echo "wemux server on $host stopped."
     else
-      echo "No wemux server running."
+      echo "No wemux server running on $host."
     fi
     if [ -e $socket ]; then
       if rm $socket; then
@@ -98,7 +99,7 @@ host_mode() {
         echo "Could not remove $socket. Please check file ownership."
       fi
     else
-      echo "The wemux session file $socket does not exist."
+      echo "The wemux socket $socket does not exist."
     fi
   }
 
@@ -109,7 +110,7 @@ host_mode() {
     echo ""
     echo "    [s]  start: Start the wemux session/join an existing wemux session."
     echo "    [a] attach: Join an existing wemux session."
-    echo "    [k]   stop: Kill the wemux session, delete the session file."
+    echo "    [k]   stop: Kill the wemux session, delete the socket."
     echo "    [n]   name: Set wemux hostname to supplied name."
     echo "    [r]  reset: Reset host to default: host"
     echo "    [h]   help: Display this screen."
@@ -248,5 +249,6 @@ if [[ "$TMUX" != *$socket* ]]; then
     client_mode "$@"
   fi
 else
+  echo "You're already attached to the wemux session on $host"
   echo "wemux does not allow nesting wemux sessions directly."
 fi
