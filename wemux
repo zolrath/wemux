@@ -25,6 +25,7 @@
 host_list=(root)
 socket="/tmp/wemux"
 options="-u"
+
 # Load configuration options from /etc/wemux.conf
 if [ -f /etc/wemux.conf ]; then
   . /etc/wemux.conf
@@ -37,7 +38,7 @@ wemux="tmux -S $socket $options"
 host_mode() {
   # Start the server if it doesn't exist, otherwise reattach.
   start_server() {
-    if ! $wemux has-session -t Host 2>/dev/null; then
+    if ! $wemux has-session -t Host &>/dev/null; then
       $wemux new-session -d -s Host
       chmod 1777 $socket
       echo "wemux server started."
@@ -54,7 +55,7 @@ host_mode() {
 
   # Stop the wemux session and remove the socket file.
   stop_server() {
-    if $wemux kill-server; then
+    if $wemux kill-server &>/dev/null; then
       echo "wemux server stopped."
     else
       echo "No wemux server running."
@@ -98,7 +99,7 @@ host_mode() {
 client_mode() {
   # Mirror mode, allows the user to view wemux session in read only mode.
   mirror_mode() {
-    if $wemux has-session -t Host >/dev/null 2>&1; then
+    if $wemux has-session -t Host &>/dev/null; then
       $wemux display-message "$USER has attached in mirror mode."
       $wemux attach -t Host -r
       $wemux display-message "$USER has detached."
@@ -110,11 +111,11 @@ client_mode() {
   # Pair mode, allows user to interact with wemux session.
   # Will connect to existing pair session or create one if necessary.
   pair_mode() {
-    if $wemux has-session -t $USER >/dev/null 2>&1; then
+    if $wemux has-session -t $USER &>/dev/null; then
       $wemux display-message "$USER has reattached in pair mode."
       $wemux attach -t $USER
       $wemux display-message "$USER has detached."
-    elif $wemux has-session -t Host >/dev/null 2>&1; then
+    elif $wemux has-session -t Host &>/dev/null; then
       $wemux display-message "$USER has attached in pair mode."
       $wemux new-session -d -t Host -s $USER
       $wemux new-window -n $USER
@@ -129,11 +130,11 @@ client_mode() {
   # If pair mode session exists, reattach to it.
   # If no pair mode session exists, mirror the host.
   smart_reattach() {
-    if $wemux has-session -t $USER >/dev/null 2>&1; then
+    if $wemux has-session -t $USER &>/dev/null; then
       $wemux display-message "$USER has reattached in pair mode."
       $wemux attach -t $USER
       $wemux display-message "$USER has detached."
-    elif $wemux has-session -t Host >/dev/null 2>&1; then
+    elif $wemux has-session -t Host &>/dev/null; then
       $wemux display-message "$USER has attached in mirror mode."
       $wemux attach -t Host -r
       $wemux display-message "$USER has detached."
@@ -176,10 +177,9 @@ user_is_a_host() {
   return 1
 }
 
-
-
 # Don't allow wemux to be run directly within a wemux session.
 if [[ "$TMUX" != *$socket* ]]; then
+  # If user is in host list, use host mode. If not, use client mode.
   if user_is_a_host; then
     host_mode $1
   else
