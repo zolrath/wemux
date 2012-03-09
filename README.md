@@ -31,9 +31,11 @@ see you work, or
 
     ln -s /Users/YOUR_USER_NAME/.wemux/wemux-linux /usr/local/bin/wemux
 
-  Add the following to the host accounts `.bash_profile` or `.zshrc`
+  To set a user as host add their username to the host_list array located at the
+  start of code in wemux (or if using wemux-linux, modify code there.)
 
-    export WEMUX_HOST=true
+    host_list=(furd ottiferous)
+
 
 ## Host Commands
 #### wemux start

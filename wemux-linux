@@ -1,6 +1,6 @@
 #!/bin/bash
 # wemux-linux by Matt Furden @zolrath
-# version 1.0.2
+# version 1.1.0
 # Linux version removes stderr redirection until tmux/epoll error is fixed.
 #
 # wemux allows you to start a shared tmux session using the command 'wemux'.
@@ -8,8 +8,7 @@
 # or pairing, which will allow them to edit your file (shared cursor) or work
 # in another window (separate cursors) in the hosts tmux session.
 #
-# To set a user as host add the following line to their .bash_profile or .zshrc
-# export WEMUX_HOST=true
+# To set a user as host add their username to the host_list array.
 #
 # WEMUX HOST COMMANDS:
 # wemux start : Start the wemux session/join an exist wemux session.
@@ -21,10 +20,17 @@
 # wemux pair  : Attach to Host in pair mode, which allows editing.
 # wemux help  : Display the help screen.
 
+###############################################################################
+
+# Host List:
+# Add names of users who should use wemux in host mode.
+# ex: host_list=(zolrath csagan brocksamson)
+host_list=(furd ottiferous)
+
 # Set $wemux to wemux session file.
 wemux="tmux -S /tmp/wemux -u"
 
-# Host mode, used when user has the env variable $WEMUX_HOST set to true.
+# Host mode, used when user is listed in the host_list array.
 host_mode() {
   # Start the server if it doesn't exist, otherwise reattach.
   start_server() {
@@ -85,7 +91,7 @@ host_mode() {
   fi
 }
 
-# Client Mode, used whenever $WEMUX_HOST is not set.
+# Client Mode, used when user is NOT listed in the host_list array.
 client_mode() {
   # Mirror mode, allows the user to view wemux session in read only mode.
   mirror_mode() {
@@ -158,10 +164,18 @@ client_mode() {
   fi
 }
 
+# Check if current user is listed in the host_list.
+user_is_a_host() {
+  for user in "${host_list[@]}"
+  do
+    [[ "$user" == "$USER" ]] && return 0
+  done
+  return 1
+}
+
 # Don't allow wemux to be run directly within a wemux session.
 if [[ "$TMUX" != *wemux* ]]; then
-  # Activate either Host or Client mode depending on WEMUX_HOST variable.
-  if [ "$WEMUX_HOST" == true ]; then
+  if user_is_a_host; then
     host_mode $1
   else
     client_mode $1
