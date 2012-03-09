@@ -1,6 +1,6 @@
 #!/bin/bash
 # wemux by Matt Furden @zolrath
-# version 1.1.3
+# version 1.2.0
 #
 # wemux allows you to start a shared tmux session using the command 'wemux'.
 # Clients have the option of mirroring, which will give them read-only access,
@@ -10,26 +10,68 @@
 # To set a user as host add their username to the host_list in /etc/wemux.conf
 #
 # WEMUX HOST COMMANDS:
-# wemux start : Start the wemux session/join an exist wemux session.
-# wemux stop  : Stop the wemux session, delete the session file.
+# wemux start : Start the wemux session/join an existing wemux session.
+# wemux attach: Join an existing wemux session.
+# wemux stop  : Stop the wemux server, delete the socket.
 # wemux help  : Display the help screen.
 #
 # WEMUX CLIENT COMMANDS:
 # wemux mirror: Attach to Host in read-only mode.
 # wemux pair  : Attach to Host in pair mode, which allows editing.
+# wemux logout: Log out of the wemux pairing session.
 # wemux help  : Display the help screen.
 
 ###############################################################################
 
+# Setup and Configuration Files.
 # Default settings in case /etc/wemux.conf doesn't exist:
 host_list=(root)
-socket="/tmp/wemux"
+socket_prefix="/tmp/wemux"
 options="-u"
 
 # Load configuration options from /etc/wemux.conf
 if [ -f /etc/wemux.conf ]; then
   . /etc/wemux.conf
 fi
+
+# Load the hostname of last wemux session.
+if [ -f ~/.wemux_last_host ]; then
+  host=`cat ~/.wemux_last_host`
+  old_host=$host
+fi
+
+# Check to see if supplied argument is a valid wemux command.
+is_wemux_command() {
+  wemux_commands=(start s stop kill k attach a mirror m pair p logout l p
+                  help h edit e read r join j)
+  for command in "${wemux_commands[@]}"; do
+    [[ "$command" == "$1" ]] && return 0
+  done
+  return 1
+}
+
+# Change hostname for session.
+change_host() {
+  host="$1"
+  echo $host > ~/.wemux_last_host
+}
+
+# Check to see if user has supplied a hostname or if we have one loaded from our
+# ~/.wemux_last_session file. Only use second argument as hostname if the first
+# argument is a wemux command as otherwise it's likely just a tmux command.
+if [ -z "$2" ]; then
+  if [ -z $host ]; then
+    change_host host
+  fi
+elif is_wemux_command $1; then
+  change_host $2
+fi
+
+# Set client's pair mode session name.
+client_session="$host-$USER"
+
+# Set socket to include hostname.
+socket="${socket_prefix}-$host"
 
 # Set $wemux to wemux session file.
 wemux="tmux -S $socket $options"
@@ -38,8 +80,8 @@ wemux="tmux -S $socket $options"
 host_mode() {
   # Start the server if it doesn't exist, otherwise reattach.
   start_server() {
-    if ! $wemux has-session -t Host &>/dev/null; then
-      $wemux new-session -d -s Host
+    if ! $wemux has-session -t $host &>/dev/null; then
+      $wemux new-session -d -s $host
       chmod 1777 $socket
       echo "wemux server started."
     fi
@@ -48,9 +90,14 @@ host_mode() {
 
   # Reattach to the wemux session.
   reattach() {
-    $wemux display-message "$USER has reattached."
-    $wemux attach -t Host
-    $wemux display-message "$USER has detached."
+    if $wemux has-session -t $host &>/dev/null; then
+      $wemux display-message "$USER has reattached."
+      $wemux attach -t $host
+      $wemux display-message "$USER has detached."
+    else
+      echo "No wemux session to attach to on $host."
+      change_host $old_host
+    fi
   }
 
   # Stop the wemux session and remove the socket file.
@@ -69,12 +116,15 @@ host_mode() {
     else
       echo "The wemux session file $socket does not exist."
     fi
+    change_host $old_host
   }
 
   # Display the commands available in host mode.
   display_host_commands() {
+    echo "The current wemux host is set to $host"
     echo "To host a wemux session please use one of the following:"
     echo "    [s]  start: Start the wemux session/join an existing wemux session."
+    echo "    [a] attach: Join an existing wemux session."
     echo "    [k]   stop: Kill the wemux session, delete the session file."
     echo "    [h]   help: Display this screen."
     echo "       no args: Start the wemux session/join an existing wemux session."
@@ -86,13 +136,15 @@ host_mode() {
     start_server
   else
     case "$1" in
-      start|s) start_server;;
-      stop|st) stop_server;;
-      kill|k)  stop_server;;
-      help|h)  display_host_commands;;
-      *)       if ! $wemux $1; then
-                 display_host_commands
-               fi;;
+      start|s)  start_server;;
+      attach|a) reattach;;
+      join|j)   reattach;;
+      stop|st)  stop_server;;
+      kill|k)   stop_server;;
+      help|h)   display_host_commands;;
+      *)        if ! $wemux $1; then
+                  display_host_commands
+                fi;;
     esac
   fi
 }
@@ -101,30 +153,44 @@ host_mode() {
 client_mode() {
   # Mirror mode, allows the user to view wemux session in read only mode.
   mirror_mode() {
-    if $wemux has-session -t Host &>/dev/null; then
+    if $wemux has-session -t $host &>/dev/null; then
       $wemux display-message "$USER has attached in mirror mode."
-      $wemux attach -t Host -r
+      $wemux attach -t $host -r
       $wemux display-message "$USER has detached."
     else
-      echo "No wemux session to mirror."
+      echo "No wemux session to mirror on $host."
+      change_host $old_host
     fi
   }
 
   # Pair mode, allows user to interact with wemux session.
   # Will connect to existing pair session or create one if necessary.
   pair_mode() {
-    if $wemux has-session -t $USER &>/dev/null; then
+    if $wemux has-session -t $client_session &>/dev/null; then
       $wemux display-message "$USER has reattached in pair mode."
-      $wemux attach -t $USER
+      $wemux attach -t $client_session
       $wemux display-message "$USER has detached."
-    elif $wemux has-session -t Host &>/dev/null; then
+    elif $wemux has-session -t $host &>/dev/null; then
       $wemux display-message "$USER has attached in pair mode."
-      $wemux new-session -d -t Host -s $USER
+      $wemux new-session -d -t $host -s $client_session
       $wemux new-window -n $USER
-      $wemux attach -t $USER
+      $wemux attach -t $client_session
       $wemux display-message "$USER has detached."
     else
-      echo "No wemux session to pair with."
+      echo "No wemux session to pair with on $host."
+      change_host $old_host
+    fi
+  }
+
+  # Log user out of pair mode, allows them to wemux pair HOSTNAME with another.
+  logout_pair() {
+    if $wemux has-session -t $client_session &>/dev/null; then
+      $wemux display-message "$USER has logged out of pair mode."
+      $wemux kill-session -t $client_session
+      echo "Logged out of pair mode with $host."
+    else
+      echo "No wemux session to log out of with $host."
+      change_host $old_host
     fi
   }
 
@@ -132,24 +198,27 @@ client_mode() {
   # If pair mode session exists, reattach to it.
   # If no pair mode session exists, mirror the host.
   smart_reattach() {
-    if $wemux has-session -t $USER &>/dev/null; then
+    if $wemux has-session -t $client_session &>/dev/null; then
       $wemux display-message "$USER has reattached in pair mode."
-      $wemux attach -t $USER
+      $wemux attach -t $client_session
       $wemux display-message "$USER has detached."
-    elif $wemux has-session -t Host &>/dev/null; then
+    elif $wemux has-session -t $host &>/dev/null; then
       $wemux display-message "$USER has attached in mirror mode."
-      $wemux attach -t Host -r
+      $wemux attach -t $host -r
       $wemux display-message "$USER has detached."
     else
-      echo "No wemux session to attach to."
+      echo "No wemux session to attach to on $host."
+      change_host $old_host
     fi
   }
 
   # Display the commands available in client mode.
   display_client_commands() {
+    echo "The current wemux host is set to $host"
     echo "To connect to wemux please use one of the following:"
     echo "    [m] mirror: Attach to Host in read-only mode."
     echo "    [p]   pair: Attach to Host in pair mode, which allows editing."
+    echo "    [l] logout: Log out of the current wemux pairing session."
     echo "    [h]   help: Display this screen."
     echo "       no args: Attach to pair session if it already exists, otherwise mirror."
   }
@@ -164,6 +233,8 @@ client_mode() {
       read|r)   mirror_mode;;
       pair|p)   pair_mode;;
       edit|e)   pair_mode;;
+      logout|l) logout_pair;;
+      stop|s)   logout_pair;;
       help|h)   display_client_commands;;
       *)        if ! $wemux $1; then
                   display_client_commands
@@ -174,8 +245,7 @@ client_mode() {
 
 # Check if current user is listed in the host_list.
 user_is_a_host() {
-  for user in "${host_list[@]}"
-  do
+  for user in "${host_list[@]}"; do
     [[ "$user" == "$USER" ]] && return 0
   done
   return 1

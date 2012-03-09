@@ -45,6 +45,8 @@ see you work, or
   Use `wemux start` to start a wemux session, chmod /tmp/wemux to 1777 and
   attach to it.  If a wemux session already exists, it will attach to it
   instead.
+#### wemux attach
+  Use `wemux attach` to join an existing wemux session.
 #### wemux stop
   Use `wemux stop` to kill the wemux session and remove the /tmp/wemux session
   file.
@@ -60,6 +62,8 @@ see you work, or
   Use `wemux mirror` to attach to Host in read-only mode.
 #### wemux pair
   Use `wemux pair` to attach to Host in pair mode, which allows editing.
+#### wemux logout
+  Use `wemux logout` to remove your pair mode session.
 #### wemux
   When `wemux` is run without any arguments in client mode, its behavior
   attempts to intelligently select mirror or pair:
@@ -68,6 +72,35 @@ see you work, or
   wemux session in mirror mode.
   * If the client has already started a wemux pair mode session, it will
   reattach to the session in pair mode.
+
+#### Other Commands
+  wemux passes commands it doesn't understand through to tmux with the correct
+  socket setting.
+
+  `wemux list-sessions` is the same as entering `tmux -S /tmp/wemux
+  list-sessions`
+
+## Multi-Host Capabilities
+  wemux supports passing a second argument to its commands to specify a specific
+  session hostname. This allows multiple hosts on the same machine to host their
+  own independent wemux sessions with their own clients.
+
+  This is not needed for most use cases.
+
+  wemux will remember the last host attached to in order to make reconnecting to
+  the same hostname easy. `wemux help` will output the currently specified
+  hostname along with the wemux command list.
+
+### Specifying Hostname
+  All the commands you know and love will accept an optional second argument of
+  the hostname you would like to start/attach/mirror/pair to.
+
+    wemux start ProjectX
+    wemux attach ProjectX
+    wemux stop ProjectX
+    wemux mirror ProjectX
+    wemux pair ProjectX
+    wemux logout ProjectX
 
 ## Configuration
 ### Host Mode
