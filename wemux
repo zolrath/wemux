@@ -38,19 +38,19 @@ if [ -f /etc/wemux.conf ]; then
   . /etc/wemux.conf
 fi
 
+# Change hostname for session.
+change_host() {
+  echo "Changed wemux hostname from $host to $1"
+  host="$1"
+  echo $host > ~/.wemux_last_host
+}
+
 # Load the hostname of last wemux session.
 if [ -f ~/.wemux_last_host ]; then
   host=`cat ~/.wemux_last_host`
 else
   change_host host
 fi
-
-# Change hostname for session.
-change_host() {
-  echo "Changed wemux hostname from $host to: $1"
-  host="$1"
-  echo $host > ~/.wemux_last_host
-}
 
 # Set client's pair mode session name.
 client_session="$host-$USER"
@@ -106,6 +106,7 @@ host_mode() {
   display_host_commands() {
     echo "The current wemux host is set to $host"
     echo "To host a wemux session please use one of the following:"
+    echo ""
     echo "    [s]  start: Start the wemux session/join an existing wemux session."
     echo "    [a] attach: Join an existing wemux session."
     echo "    [k]   stop: Kill the wemux session, delete the session file."
@@ -199,6 +200,7 @@ client_mode() {
   display_client_commands() {
     echo "The current wemux host is set to $host"
     echo "To connect to wemux please use one of the following:"
+    echo ""
     echo "    [m] mirror: Attach to Host in read-only mode."
     echo "    [p]   pair: Attach to Host in pair mode, which allows editing."
     echo "    [l] logout: Log out of the current wemux pairing session."
