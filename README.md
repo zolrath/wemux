@@ -80,6 +80,10 @@ see you work, or
   `wemux list-sessions` is the same as entering `tmux -S /tmp/wemux
   list-sessions`
 
+## Short-form Commands
+  All commands have a short form. s for start, a for attach, p for pair etc.
+  For a complete list, type `wemux help` (or `wemux h`)
+
 ## Multi-Host Capabilities
   wemux supports passing a second argument to its commands to specify a specific
   session hostname. This allows multiple hosts on the same machine to host their
@@ -101,6 +105,12 @@ see you work, or
     wemux mirror ProjectX
     wemux pair ProjectX
     wemux logout ProjectX
+    wemux reset
+
+### Resetting the Hostname
+  In order to easily return to the default hostname you can run `wemux reset`
+#### wemux reset
+  Resets the wemux hostname to the default: host
 
 ## Configuration
 ### Host Mode

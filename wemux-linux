@@ -1,7 +1,7 @@
 #!/bin/bash
 # wemux-linux by Matt Furden @zolrath
 # Linux version removes stderr redirection until tmux/epoll error is fixed.
-# version 1.2.0
+# version 1.2.1
 #
 # wemux allows you to start a shared tmux session using the command 'wemux'.
 # Clients have the option of mirroring, which will give them read-only access,
@@ -14,12 +14,14 @@
 # wemux start : Start the wemux session/join an existing wemux session.
 # wemux attach: Join an existing wemux session.
 # wemux stop  : Stop the wemux server, delete the socket.
+# wemux reset : Reset host to default: host
 # wemux help  : Display the help screen.
 #
 # WEMUX CLIENT COMMANDS:
 # wemux mirror: Attach to Host in read-only mode.
 # wemux pair  : Attach to Host in pair mode, which allows editing.
 # wemux logout: Log out of the wemux pairing session.
+# wemux reset : Reset host to default: host
 # wemux help  : Display the help screen.
 
 ###############################################################################
@@ -44,7 +46,7 @@ fi
 # Check to see if supplied argument is a valid wemux command.
 is_wemux_command() {
   wemux_commands=(start s stop kill k attach a mirror m pair p logout l p
-                  help h edit e read r join j)
+                  help h edit e join j)
   for command in "${wemux_commands[@]}"; do
     [[ "$command" == "$1" ]] && return 0
   done
@@ -127,6 +129,7 @@ host_mode() {
     echo "    [s]  start: Start the wemux session/join an existing wemux session."
     echo "    [a] attach: Join an existing wemux session."
     echo "    [k]   stop: Kill the wemux session, delete the session file."
+    echo "    [r]  reset: Reset host to default: host"
     echo "    [h]   help: Display this screen."
     echo "       no args: Start the wemux session/join an existing wemux session."
   }
@@ -143,6 +146,8 @@ host_mode() {
       stop|st)  stop_server;;
       kill|k)   stop_server;;
       help|h)   display_host_commands;;
+      reset|r)  change_host host
+                echo "Reset wemux hostname from $old_host to: host";;
       *)        if ! $wemux $1; then
                   display_host_commands
                 fi;;
@@ -220,6 +225,7 @@ client_mode() {
     echo "    [m] mirror: Attach to Host in read-only mode."
     echo "    [p]   pair: Attach to Host in pair mode, which allows editing."
     echo "    [l] logout: Log out of the current wemux pairing session."
+    echo "    [r]  reset: Reset host to default: host"
     echo "    [h]   help: Display this screen."
     echo "       no args: Attach to pair session if it already exists, otherwise mirror."
   }
@@ -231,12 +237,13 @@ client_mode() {
   else
     case "$1" in
       mirror|m) mirror_mode;;
-      read|r)   mirror_mode;;
       pair|p)   pair_mode;;
       edit|e)   pair_mode;;
       logout|l) logout_pair;;
       stop|s)   logout_pair;;
       help|h)   display_client_commands;;
+      reset|r)  change_host host
+                echo "Reset wemux hostname from $old_host to: host";;
       *)        if ! $wemux $1; then
                   display_client_commands
                 fi;;
