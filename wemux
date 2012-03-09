@@ -41,17 +41,15 @@ fi
 # Load the hostname of last wemux session.
 if [ -f ~/.wemux_last_host ]; then
   host=`cat ~/.wemux_last_host`
-  old_host=$host
 else
   change_host host
-  old_host=$host
 fi
 
 # Change hostname for session.
 change_host() {
+  echo "Changed wemux hostname from $host to: $1"
   host="$1"
   echo $host > ~/.wemux_last_host
-  echo "Changed wemux hostname to: $1"
 }
 
 # Set client's pair mode session name.
@@ -130,8 +128,7 @@ host_mode() {
       kill|k)   stop_server;;
       help|h)   display_host_commands;;
       name|n)   change_host $2;;
-      reset|r)  change_host host
-                echo "Reset wemux hostname from $old_host to: host";;
+      reset|r)  change_host host;;
       *)        if ! $wemux $1; then
                   display_host_commands
                 fi;;
@@ -224,8 +221,7 @@ client_mode() {
       stop|s)   logout_pair;;
       help|h)   display_client_commands;;
       name|n)   change_host $2;;
-      reset|r)  change_host host
-                echo "Reset wemux hostname from $old_host to: host";;
+      reset|r)  change_host host;;
       *)        if ! $wemux $1; then
                   display_client_commands
                 fi;;
