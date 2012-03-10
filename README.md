@@ -92,6 +92,7 @@ see you work, or
 
 ### Specifying Hostname
   To change the wemux hostname run `wemux name HOSTNAME`
+
     wemux name ProjectX
     # wemux hostname is now ProjectX
     wemux start
