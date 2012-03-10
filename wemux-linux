@@ -44,9 +44,13 @@ fi
 
 # Change hostname for session.
 change_host() {
-  echo "Changed wemux hostname from $host to $1"
-  host="$1"
-  echo $host > ~/.wemux_last_host
+  if [ -z $1 ]; then
+    echo "The current wemux host is set to $host"
+  else
+    echo "Changed wemux hostname from $host to $1"
+    host="$1"
+    echo $host > ~/.wemux_last_host
+  fi
 }
 
 # Load the hostname of last wemux session.
