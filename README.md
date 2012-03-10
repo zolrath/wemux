@@ -19,17 +19,12 @@ see you work, or
 
     git clone git://github.com/zolrath/wemux.git ~/.wemux
 
-  On OSX use wemux, on Linux machines use wemux-linux.
-  wemux-linux removes stderr redirection until tmux/epoll error is fixed.
+  wemux on Linux has no stderr redirection until the tmux/epoll error is fixed.
 
   Move or symlink the `wemux` file into your $PATH such as `/usr/local/bin/`,
   being sure to use the full path if creating a symlink.
 
     ln -s /Users/YOUR_USER_NAME/.wemux/wemux /usr/local/bin/wemux
-
-  or on Linux machines:
-
-    ln -s /home/YOUR_USER_NAME/.wemux/wemux-linux /usr/local/bin/wemux
 
   **IMPORTANT**: Copy the wemux.conf.example file to /etc/wemux.conf
 
