@@ -9,21 +9,24 @@
 #
 # To set a user as host add their username to the host_list in /etc/wemux.conf
 #
+# For environments with multiple hosts running their own independent sessions
+# on the same machine wemux can change its hostname with the wemux name command.
+#
 # WEMUX HOST COMMANDS:
 # wemux start : Start the wemux session/join an existing wemux session.
 # wemux attach: Join an existing wemux session.
 # wemux stop  : Stop the wemux server, delete the socket.
-# wemux name  : Change hostname of wemux session.
-# wemux reset : Reset host to default: host
 # wemux help  : Display the help screen.
 #
 # WEMUX CLIENT COMMANDS:
 # wemux mirror: Attach to Host in read-only mode.
 # wemux pair  : Attach to Host in pair mode, which allows editing.
 # wemux logout: Log out of the wemux pairing session.
+# wemux help  : Display the help screen.
+#
+# WEMUX HOSTNAME COMMANDS: can be run by either host or client.
 # wemux name  : Change hostname of wemux session.
 # wemux reset : Reset host to default: host
-# wemux help  : Display the help screen.
 
 ###############################################################################
 
