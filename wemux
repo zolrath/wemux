@@ -41,23 +41,12 @@ if [ -f /etc/wemux.conf ]; then
   . /etc/wemux.conf
 fi
 
-# Change hostname for session.
-change_host() {
-  if [ -z $1 ]; then
-    echo "The current wemux host is set to $host"
-  else
-    echo "Changed wemux hostname from $host to $1"
-    host="$1"
-    echo $host > ~/.wemux_last_host
-  fi
-}
-
-# Load the hostname of last wemux session.
+# Load the hostname of last wemux session. If empty, set to host.
 if [ -f ~/.wemux_last_host ]; then
   host=`cat ~/.wemux_last_host`
 else
-  host="nothing"
-  change_host "host"
+  host="host"
+  echo $host > ~/.wemux_last_host
 fi
 
 # Set client's pair mode session name.
@@ -68,6 +57,17 @@ socket="${socket_prefix}-$host"
 
 # Set $wemux to wemux session file.
 wemux="tmux -S $socket $options"
+
+# Change hostname for session, or display hostname if no argument is given.
+change_host() {
+  if [ -z $1 ]; then
+    echo "The current wemux host is set to $host"
+  else
+    echo "Changed wemux hostname from $host to $1"
+    host="$1"
+    echo $host > ~/.wemux_last_host
+  fi
+}
 
 # Host mode, used when user is listed in the host_list array in /etc/wemux.conf
 host_mode() {
