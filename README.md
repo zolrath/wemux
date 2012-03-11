@@ -16,8 +16,8 @@ see you work, or
 
 ## How To Install
   Git clone this repo to your desired location. The rest of this readme will
-  oprate under the assumption you'll place it in wemux in your /usr/local/share
-  directory.
+  operate under the assumption you'll place it in `wemux` in your
+  `/usr/local/share` directory.
 
     git clone git://github.com/zolrath/wemux.git /usr/local/share/wemux
 
@@ -26,11 +26,11 @@ see you work, or
 
     ln /usr/local/share/wemux/wemux /usr/local/bin/wemux
 
-  **IMPORTANT**: Copy the wemux.conf.example file to /etc/wemux.conf
+  **IMPORTANT**: Copy the `wemux.conf.example` file to `/etc/wemux.conf`
 
     sudo cp ~/.wemux/wemux.conf.example /etc/wemux.conf
 
-  To set a user as host add their username to the host_list in /etc/wemux.conf
+  To set a user as host add their username to the host_list in `/etc/wemux.conf`
 
     host_list=(zolrath csagan brocksampson)
 
