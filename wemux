@@ -79,14 +79,10 @@ kill_server_successful() {
 # The first argument specifies the mode the user is attaching in for the message
 # All additional arguments get wrapped in the attach/detach messages.
 announce_connection() {
-  connection_type=$1; shift
-  if host_exists || has_pair_session; then
-    $wemux display-message "$USER has attached in $connection_type mode."
-    "$@"
-    $wemux display-message "$USER has detached."
-  else
-    "$@"
-  fi
+  connection_type=$1; shift; attach_commands="$@"
+  redirect=`$wemux display-message "$USER has attached in $connection_type mode." 2>&1`
+  $attach_commands
+  redirect=`$wemux display-message "$USER has detached." 2>&1`
 }
 
 # Change hostname for session, or display hostname if no argument is given.
