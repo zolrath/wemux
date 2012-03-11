@@ -1,6 +1,6 @@
 #!/bin/bash
 # wemux by Matt Furden @zolrath
-# version 1.3.0
+# version 1.3.1
 #
 # wemux allows you to start a shared tmux session using the command 'wemux'.
 # Clients have the option of mirroring, which will give them read-only access,
@@ -8,9 +8,6 @@
 # in another window (separate cursors) in the hosts tmux session.
 #
 # To set a user as host add their username to the host_list in /etc/wemux.conf
-#
-# wemux on Linux does not redirect stderr from tmux as there is a bug with
-# tmux/epoll which causes tmux to hang when stderr is redirected.
 #
 # For environments with multiple hosts running their own independent sessions
 # on the same machine wemux can change its hostname with the wemux name command.
@@ -57,13 +54,40 @@ socket="${socket_prefix}-$host"
 # Set $wemux to wemux session file.
 wemux="tmux -S $socket $options"
 
-# Only redirect to /dev/null in OS X as tmux on other platforms has
-# an issue that causes the process to hang due to a tmux/epoll error.
-if [[ `uname` == 'Darwin' ]]; then
-  redir=/dev/null
-else
-  redir=/dev/stdout
-fi
+# The ugly group of redirects below solve the issue where tmux/epoll causes tmux
+# to hang when stderr is redirected to /dev/null in a backwards compatible way.
+
+# Returns true if host currently has a running wemux server.
+host_exists() {
+  redirect=`$wemux has-session -t $host 2>&1`; does_exist=$?
+  [ $does_exist == 0 ] && return 0 || return 1;
+}
+
+# Returns true if pair session with current host already exists.
+has_pair_session() {
+  redirect=`$wemux has-session -t $client_session 2>&1`; does_exist=$?
+  [ $does_exist == 0 ] && return 0 || return 1;
+}
+
+# Returns true if server is successfully killed.
+kill_server_successful() {
+  redirect=`$wemux kill-server 2>&1`; killed_successfully=$?
+  [ $killed_successfully == 0 ] && return 0 || return 1;
+}
+
+# Announce when user attaches/detaches from server.
+# The first argument specifies the mode the user is attaching in for the message
+# All additional arguments get wrapped in the attach/detach messages.
+announce_connection() {
+  connection_type=$1; shift
+  if host_exists || has_pair_session; then
+    $wemux display-message "$USER has attached in $connection_type mode."
+    "$@"
+    $wemux display-message "$USER has detached."
+  else
+    "$@"
+  fi
+}
 
 # Change hostname for session, or display hostname if no argument is given.
 change_host() {
@@ -80,7 +104,7 @@ change_host() {
 host_mode() {
   # Start the server if it doesn't exist, otherwise reattach.
   start_server() {
-    if ! $wemux has-session -t $host &>$redir; then
+    if ! host_exists; then
       $wemux new-session -d -s $host
       chmod 1777 $socket
       echo "wemux server started on $host."
@@ -90,7 +114,7 @@ host_mode() {
 
   # Reattach to the wemux session.
   reattach() {
-    if $wemux has-session -t $host &>$redir; then
+    if host_exists; then
       $wemux attach -t $host
     else
       echo "No wemux session to attach to on $host."
@@ -99,7 +123,7 @@ host_mode() {
 
   # Stop the wemux session and remove the socket file.
   stop_server() {
-    if $wemux kill-server &>$redir; then
+    if kill_server_successful; then
       echo "wemux server on $host stopped."
     else
       echo "No wemux server running on $host."
@@ -154,7 +178,7 @@ host_mode() {
 client_mode() {
   # Mirror mode, allows the user to view wemux session in read only mode.
   mirror_mode() {
-    if $wemux has-session -t $host &>$redir; then
+    if host_exists; then
       $wemux attach -t $host -r
     else
       echo "No wemux session to mirror on $host."
@@ -164,9 +188,9 @@ client_mode() {
   # Pair mode, allows user to interact with wemux session.
   # Will connect to existing pair session or create one if necessary.
   pair_mode() {
-    if $wemux has-session -t $client_session &>$redir; then
+    if has_pair_session; then
       $wemux attach -t $client_session
-    elif $wemux has-session -t $host &>$redir; then
+    elif host_exists; then
       $wemux new-session -d -t $host -s $client_session
       $wemux new-window -n $USER
       $wemux attach -t $client_session
@@ -177,7 +201,7 @@ client_mode() {
 
   # Log user out of pair mode, allows them to wemux pair HOSTNAME with another.
   logout_pair() {
-    if $wemux has-session -t $client_session &>$redir; then
+    if has_pair_session; then
       $wemux display-message "$USER has logged out of pair mode."
       $wemux kill-session -t $client_session
       echo "Logged out of pair mode with $host."
@@ -190,9 +214,9 @@ client_mode() {
   # If pair mode session exists, reattach to it.
   # If no pair mode session exists, mirror the host.
   smart_reattach() {
-    if $wemux has-session -t $client_session &>$redir; then
+    if has_pair_session; then
       announce_connection "pair" $wemux attach -t $client_session
-    elif $wemux has-session -t $host &>$redir; then
+    elif host_exists; then
       announce_connection "mirror" $wemux attach -t $host -r
     else
       echo "No wemux session to attach to on $host."
