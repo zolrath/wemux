@@ -15,16 +15,16 @@ see you work, or
     same tmux session.
 
 ## How To Install
-  Git clone this repo to your desired location. We'll assume that's .wemux in your user home directory.
+  Git clone this repo to your desired location. The rest of this readme will
+  oprate under the assumption you'll place it in wemux in your /usr/local/share
+  directory.
 
-    git clone git://github.com/zolrath/wemux.git ~/.wemux
+    git clone git://github.com/zolrath/wemux.git /usr/local/share/wemux
 
-  wemux on Linux has no stderr redirection until the tmux/epoll error is fixed.
+  Link the `wemux` file into your $PATH such as `/usr/local/bin/`,
+  being sure to use the full path.
 
-  Move or symlink the `wemux` file into your $PATH such as `/usr/local/bin/`,
-  being sure to use the full path if creating a symlink.
-
-    ln -s /Users/YOUR_USER_NAME/.wemux/wemux /usr/local/bin/wemux
+    ln /usr/local/share/wemux/wemux /usr/local/bin/wemux
 
   **IMPORTANT**: Copy the wemux.conf.example file to /etc/wemux.conf
 
