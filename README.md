@@ -91,16 +91,20 @@ see you work, or
   to the same hostname easy. `wemux help` will output the currently specified
   hostname along with the wemux command list.
 
+  Changing hostnames can be disabled by setting `allow_host_change="false"` in 
+  `/etc/wemux.conf`
+
 ### Specifying Hostname
-  To change the wemux hostname run `wemux name HOSTNAME`
+  To change the wemux hostname run `wemux name <hostname>`
 
     wemux name ProjectX
     # wemux hostname is now ProjectX
     wemux start
-    wemux attach
+    wemux
     wemux stop
     wemux reset
     # wemux hostname is now host
+
 #### wemux name *hostname*
     Changes wemux hostname to specified name.
 
@@ -143,6 +147,9 @@ see you work, or
     csagan has joined this hostname.
 
   This can be disabled by setting `announce_host_change="false"`
+
+  The ability to change hostnames can be disabled entirely by setting
+  `allow_host_change="false"`
 
 ### Client Modes
 

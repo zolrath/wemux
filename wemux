@@ -1,6 +1,6 @@
 #!/bin/bash
 # wemux by Matt Furden @zolrath
-# version 1.5.0
+# version 1.6.0
 #
 # wemux allows you to start a shared tmux session using the command 'wemux'.
 # Clients have the option of mirroring, which will give them read-only access,
@@ -12,6 +12,7 @@
 #
 # For environments with multiple hosts running their own independent sessions
 # on the same machine wemux can change its hostname with the wemux name command.
+# This can be disabled in the configuration file.
 #
 # WEMUX HOST COMMANDS:
 # wemux start : Start the wemux session/join an existing wemux session.
@@ -36,6 +37,7 @@
 host_list=(root)
 socket_prefix="/tmp/wemux"
 options="-u"
+allow_host_change="true"
 announce_attach="true"
 announce_host_change="true"
 
@@ -43,11 +45,17 @@ announce_host_change="true"
 [ -f /etc/wemux.conf ] && . /etc/wemux.conf
 
 # Load the hostname of last wemux session. If empty, set to host.
-if [ -f ~/.wemux_last_host ]; then
-  host=`cat ~/.wemux_last_host`
+# Change hostname to 'host' if allow_host_change is disabled.
+if [ $allow_host_change == "true" ]; then
+  if [ -f ~/.wemux_last_host ]; then
+    host=`cat ~/.wemux_last_host`
+    host=${host//[^a-zA-Z0-9]/}
+  else
+    host="host"
+    echo $host > ~/.wemux_last_host
+  fi
 else
   host="host"
-  echo $host > ~/.wemux_last_host
 fi
 
 # Build $wemux variable to call proper tmux server/session.
@@ -99,17 +107,25 @@ announce_connection() {
 # Can be disabled by changing announce_host_change to false in /etc/wemux.conf
 # Change hostname for session, or display hostname if no argument is given.
 change_host() {
-  if [ -z $1 ]; then
-    echo "The current wemux host is set to $host"
+  if [ $allow_host_change == "true" ]; then
+    if [ -z $1 ]; then
+      echo "The current wemux hostname is set to $host"
+    elif [ $1 == $host ]; then
+      echo "Your hostname is already set to $host"
+    else
+      [ $announce_host_change == "true" ] && redirect=`$wemux display-message \
+        "$USER has switched to hostname: $1" 2>&1`
+      echo "Changed wemux hostname from $host to $1"
+      host="$1"
+      host=${host//[^a-zA-Z0-9]/}
+      echo $host > ~/.wemux_last_host
+      build_wemux_prefix
+      [ $announce_host_change == "true" ] && redirect=`$wemux display-message \
+        "$USER has joined this hostname." 2>&1`
+    fi
   else
-    [ $announce_host_change == "true" ] && redirect=`$wemux display-message \
-      "$USER has switched to hostname: $1" 2>&1`
-    echo "Changed wemux hostname from $host to $1"
-    host="$1"
-    echo $host > ~/.wemux_last_host
-    build_wemux_prefix
-    [ $announce_host_change == "true" ] && redirect=`$wemux display-message \
-      "$USER has joined this hostname." 2>&1`
+    echo "Changing hostnames has been disabled."
+    return 1
   fi
   return 0
 }
@@ -155,7 +171,7 @@ host_mode() {
 
   # Display the commands available in host mode.
   display_host_commands() {
-    echo "The current wemux host is set to $host"
+    echo "The current wemux hostname is set to $host"
     echo "To host a wemux session please use one of the following:"
     echo ""
     echo "    [s]  start: Start the wemux session/join an existing wemux session."
@@ -240,7 +256,7 @@ client_mode() {
 
   # Display the commands available in client mode.
   display_client_commands() {
-    echo "The current wemux host is set to $host"
+    echo "The current wemux hostname is set to $host"
     echo "To connect to wemux please use one of the following:"
     echo ""
     echo "    [m] mirror: Attach to Host in read-only mode."
