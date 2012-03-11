@@ -1,6 +1,6 @@
 #!/bin/bash
 # wemux by Matt Furden @zolrath
-# version 1.6.0
+# version 1.6.1
 #
 # wemux allows you to start a shared tmux session using the command 'wemux'.
 # Clients have the option of mirroring, which will give them read-only access,
@@ -44,15 +44,25 @@ announce_host_change="true"
 # Load configuration options from /etc/wemux.conf
 [ -f /etc/wemux.conf ] && . /etc/wemux.conf
 
+# Sanitize hostname, replace spaces and underscores with dashes.
+# Remove all non alpha-numeric characters.
+sanitize_hostname() {
+  local newhost=$@
+  local newhost=${newhost// /\-}
+  local newhost=${newhost//_/\-}
+  local newhost=${newhost//[^a-zA-Z0-9\-]/}
+  echo $newhost
+}
+
 # Load the hostname of last wemux session. If empty, set to host.
 # Change hostname to 'host' if allow_host_change is disabled.
 if [ $allow_host_change == "true" ]; then
   if [ -f ~/.wemux_last_host ]; then
     host=`cat ~/.wemux_last_host`
-    host=${host//[^a-zA-Z0-9]/}
+    host=`sanitize_hostname $host`
+    echo $host > ~/.wemux_last_host
   else
     host="host"
-    echo $host > ~/.wemux_last_host
   fi
 else
   host="host"
@@ -108,16 +118,19 @@ announce_connection() {
 # Change hostname for session, or display hostname if no argument is given.
 change_host() {
   if [ $allow_host_change == "true" ]; then
+    # Sanitize input.
+    newhost=`sanitize_hostname $@`
+    oldhost=$host
+
     if [ -z $1 ]; then
       echo "The current wemux hostname is set to $host"
-    elif [ $1 == $host ]; then
+    elif [ $newhost == $oldhost ]; then
       echo "Your hostname is already set to $host"
     else
       [ $announce_host_change == "true" ] && redirect=`$wemux display-message \
-        "$USER has switched to hostname: $1" 2>&1`
-      echo "Changed wemux hostname from $host to $1"
-      host="$1"
-      host=${host//[^a-zA-Z0-9]/}
+        "$USER has switched to hostname: $newhost" 2>&1`
+      echo "Changed wemux hostname from $oldhost to $newhost"
+      host=$newhost
       echo $host > ~/.wemux_last_host
       build_wemux_prefix
       [ $announce_host_change == "true" ] && redirect=`$wemux display-message \
@@ -171,14 +184,19 @@ host_mode() {
 
   # Display the commands available in host mode.
   display_host_commands() {
-    echo "The current wemux hostname is set to $host"
+    if [ $allow_host_change == "true" ]; then
+      echo "The current wemux hostname is set to $host"
+    fi
     echo "To host a wemux session please use one of the following:"
     echo ""
     echo "    [s]  start: Start the wemux session/join an existing wemux session."
     echo "    [a] attach: Join an existing wemux session."
     echo "    [k]   stop: Kill the wemux session, delete the socket."
-    echo "    [n]   name: Set wemux hostname to supplied name."
-    echo "    [r]  reset: Reset host to default: host"
+    echo ""
+    if [ $allow_host_change == "true" ]; then
+      echo "    [n]   name: Set wemux hostname to supplied name."
+      echo "    [r]  reset: Reset host to default: host"
+    fi
     echo "    [h]   help: Display this screen."
     echo "       no args: Start the wemux session/join an existing wemux session."
   }
@@ -194,8 +212,8 @@ host_mode() {
       join|j)   announce_connection host reattach;;
       stop|st)  stop_server;;
       kill|k)   stop_server;;
-      name|n)   change_host $2;;
       help|h)   display_host_commands;;
+      name|n)   shift; change_host $@;;
       reset|r)  change_host host;;
       *)        if ! $wemux $1; then
                   display_host_commands
@@ -256,14 +274,19 @@ client_mode() {
 
   # Display the commands available in client mode.
   display_client_commands() {
-    echo "The current wemux hostname is set to $host"
+    if [ $allow_host_change == "true" ]; then
+      echo "The current wemux hostname is set to $host"
+    fi
     echo "To connect to wemux please use one of the following:"
     echo ""
     echo "    [m] mirror: Attach to Host in read-only mode."
     echo "    [p]   pair: Attach to Host in pair mode, which allows editing."
     echo "    [l] logout: Log out of the current wemux pairing session."
-    echo "    [n]   name: Set name of wemux hostname you wish to connect to."
-    echo "    [r]  reset: Reset host to default: host"
+    echo ""
+    if [ $allow_host_change == "true" ]; then
+      echo "    [n]   name: Set name of wemux hostname you wish to connect to."
+      echo "    [r]  reset: Reset host to default: host"
+    fi
     echo "    [h]   help: Display this screen."
     echo "       no args: Attach to pair session if it already exists, otherwise mirror."
   }
@@ -280,7 +303,7 @@ client_mode() {
       logout|l) logout_pair;;
       stop|s)   logout_pair;;
       help|h)   display_client_commands;;
-      name|n)   change_host $2;;
+      name|n)   shift; change_host $@;;
       reset|r)  change_host host;;
       *)        if ! $wemux $1; then
                   display_client_commands
