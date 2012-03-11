@@ -1,6 +1,6 @@
 #!/bin/bash
 # wemux by Matt Furden @zolrath
-# version 1.4.0
+# version 1.5.0
 #
 # wemux allows you to start a shared tmux session using the command 'wemux'.
 # Clients have the option of mirroring, which will give them read-only access,
@@ -8,6 +8,7 @@
 # in another window (separate cursors) in the hosts tmux session.
 #
 # To set a user as host add their username to the host_list in /etc/wemux.conf
+# Other configuations options are also located in /etc/wemux.conf
 #
 # For environments with multiple hosts running their own independent sessions
 # on the same machine wemux can change its hostname with the wemux name command.
@@ -31,10 +32,12 @@
 ###############################################################################
 
 # Setup and Configuration Files.
-# Default settings in case /etc/wemux.conf doesn't exist:
+# Default settings, modify them in the /etc/wemux.conf file:
 host_list=(root)
 socket_prefix="/tmp/wemux"
 options="-u"
+announce_attach="true"
+announce_host_change="true"
 
 # Load configuration options from /etc/wemux.conf
 [ -f /etc/wemux.conf ] && . /etc/wemux.conf
@@ -79,28 +82,36 @@ kill_server_successful() {
 }
 
 # Announce when user attaches/detaches from server.
+# Can be disabled by changing announce_attach to false in /etc/wemux.conf
 # The first argument specifies the mode the user is attaching in for the message
 # All additional arguments get wrapped in the attach/detach messages.
 announce_connection() {
   connection_type=$1; shift; attach_commands="$@"
-  redirect=`$wemux display-message "$USER has attached in $connection_type mode." 2>&1`
+  [ $announce_attach == "true" ] && redirect=`$wemux display-message \
+    "$USER has attached in $connection_type mode." 2>&1`
   $attach_commands
-  redirect=`$wemux display-message "$USER has detached." 2>&1`
+  [ $announce_attach == "true" ] && redirect=`$wemux display-message \
+    "$USER has detached." 2>&1`
+  return 0
 }
 
 # Announces when a user joins/changes their hostname.
+# Can be disabled by changing announce_host_change to false in /etc/wemux.conf
 # Change hostname for session, or display hostname if no argument is given.
 change_host() {
   if [ -z $1 ]; then
     echo "The current wemux host is set to $host"
   else
-    redirect=`$wemux display-message "$USER has switched to hostname: $1" 2>&1`
+    [ $announce_host_change == "true" ] && redirect=`$wemux display-message \
+      "$USER has switched to hostname: $1" 2>&1`
     echo "Changed wemux hostname from $host to $1"
     host="$1"
     echo $host > ~/.wemux_last_host
     build_wemux_prefix
-    redirect=`$wemux display-message "$USER has joined this hostname." 2>&1`
+    [ $announce_host_change == "true" ] && redirect=`$wemux display-message \
+      "$USER has joined this hostname." 2>&1`
   fi
+  return 0
 }
 
 # Host mode, used when user is listed in the host_list array in /etc/wemux.conf
@@ -205,7 +216,8 @@ client_mode() {
   # Log user out of pair mode, allows them to wemux pair HOSTNAME with another.
   logout_pair() {
     if has_pair_session; then
-      $wemux display-message "$USER has logged out of pair mode."
+      [ $announce_attach == "true" ] && $wemux display-message \
+        "$USER has logged out of pair mode."
       $wemux kill-session -t $client_session
       echo "Logged out of pair mode with $host."
     else

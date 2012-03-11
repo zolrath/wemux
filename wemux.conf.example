@@ -7,8 +7,17 @@
 host_list=(root)
 
 # Location of tmux socket:
+# Defaults to "/tmp/wemux"
 # socket-prefix="/tmp/wemux"
 
 # Tmux Options:
 # Defaults to -u to have tmux always attempt to use utf-8 mode.
 # options="-u"
+
+# Announce when users attach/detach from a tmux session.
+# Defaults to "true"
+# announce_attach="true"
+
+# Announce when users change the wemux hostname they are using.
+# Defaults to "true"
+# announce_host_change="true"

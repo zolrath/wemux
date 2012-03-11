@@ -23,10 +23,10 @@ see you work, or
 
     git clone git://github.com/zolrath/wemux.git /usr/local/share/wemux
 
-  Link the `wemux` file into your $PATH such as `/usr/local/bin/`,
+  Symlink the `wemux` file into your $PATH such as `/usr/local/bin/`,
   being sure to use the full path.
 
-    ln /usr/local/share/wemux/wemux /usr/local/bin/wemux
+    ln -s /usr/local/share/wemux/wemux /usr/local/bin/wemux
 
   **IMPORTANT**: Copy the `wemux.conf.example` file to `/etc/wemux.conf`
 
@@ -110,37 +110,65 @@ see you work, or
   Resets the wemux hostname to the default: host
 
 ## Configuration
+  There are a number of options that be configured in `/etc/wemux.conf`.  In
+  most cases the only option that must be changed is the `host_list` array.
+
 ### Host Mode
-To have an account act as host, ensure that you have added their username to the
-/etc/wemux.conf file's host_list array.
+  To have an account act as host, ensure that you have added their username to the
+  `/etc/wemux.conf` file's `host_list` array.
 
     host_list=(zolrath hostusername csagan brocksampson)
 
+### Announcements
+  When a user joins a session in either mirror or pair mode, a message is
+  displayed to all currently attached users:
+
+    csagan has attached in mirror mode.
+    csagan has detached.
+
+ This can be disabled by setting `announce_attach="false"`
+
+ In addition, when a user switches from one host to another via the `wemux name
+ <hostname>` command, their movement is displayed similarly to the attach
+ messages.
+
+  If csagan enters `wemux name applepie` the users on the default hostname
+  `host` will see:
+
+    csagan has switched to hostname: applepie
+
+  If csagan returns to default hostname with: `wemux reset` users on `host`
+  will see:
+
+    csagan has joined this hostname.
+
+  This can be disabled by setting `announce_host_change="false"`
+
 ### Client Modes
 
-To make an SSHed user start in a wemux mode automatically, add one of the
-following lines to the users `.bash_profile` or `.zshrc`
+  To make an SSHed user start in a wemux mode automatically, add one of the
+  following lines to the users `.bash_profile` or `.zshrc`
 
-**Option 1**: Automatically log the client into mirror mode upon login,
+  **Option 1**: Automatically log the client into mirror mode upon login,
   disconnect them from the server when they detach.
 
     wemux mirror; exit
 
-**Option 2**: Automatically start the client in mirror mode but allow them to
-detach.
+  **Option 2**: Automatically start the client in mirror mode but allow them to
+  detach.
 
     wemux mirror
 
-**Option 3**: Automatically start the client in pair mode but allow them to
-detach.
+  **Option 3**: Automatically start the client in pair mode but allow them to
+  detach.
 
     wemux pair
 
-**Option 4**: Only display the connection commands, don't automatically start
-any modes.
+  **Option 4**: Only display the connection commands, don't automatically start
+  any modes.
 
     wemux help
 
-Please note that this does not ensure a logged in user will not be able to exit
-tmux and access their shell. If the user is not trusted, you must perform any
-security measures one would normally perform for a remote user.
+  Please note that this does not ensure a logged in user will not be able to exit
+  tmux and access their shell. If the user is not trusted, you must perform any
+  security measures one would normally perform for a remote user.
