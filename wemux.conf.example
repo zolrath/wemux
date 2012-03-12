@@ -12,6 +12,10 @@ host_list=(root)
 # Defaults to "true"
 # allow_host_change="false"
 
+# Allow users to list all currently running wemux sockets/hostnames.
+# Defaults to "true"
+# allow_host_list="false"
+
 # Announce when users attach/detach from a tmux session.
 # Defaults to "true"
 # announce_attach="false"

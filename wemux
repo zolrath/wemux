@@ -1,6 +1,6 @@
 #!/bin/bash
 # wemux by Matt Furden @zolrath
-# version 1.6.1
+# version 1.7.0
 #
 # wemux allows you to start a shared tmux session using the command 'wemux'.
 # Clients have the option of mirroring, which will give them read-only access,
@@ -29,6 +29,7 @@
 # WEMUX HOSTNAME COMMANDS: can be run by either host or client.
 # wemux name  : Change hostname of wemux session.
 # wemux reset : Reset host to default: host
+# wemux list  : List all currently active wemux hosts.
 
 ###############################################################################
 
@@ -38,6 +39,7 @@ host_list=(root)
 socket_prefix="/tmp/wemux"
 options="-u"
 allow_host_change="true"
+allow_host_list="true"
 announce_attach="true"
 announce_host_change="true"
 
@@ -76,6 +78,31 @@ build_wemux_prefix() {
   socket="${socket_prefix}-$host"
   # Set $wemux to wemux session file.
   wemux="tmux -S $socket $options"
+}
+
+# List all currently running wemux servers.
+list_active_hosts() {
+  if [ $allow_host_change == "true" ]; then
+    if [ $allow_host_list == "true" ]; then
+      wemux_host_sockets=$socket_prefix*
+      echo "Currently active wemux hosts:"
+      echo ""
+      for socket in $wemux_host_sockets; do
+        redirect=`tmux -S $socket server-info 2>&1`; server_running=$?
+        if [ $server_running == 0 ]; then
+          num=$[num+1]
+          hostname=`echo "$socket" | sed -e "s,$socket_prefix-,,"`
+          echo "$num. $hostname"
+        fi
+      done
+      echo ""
+      echo "Current wemux hostname: $host"
+    else
+      echo "Hostname listing has been disabled."
+    fi
+  else
+    echo "Hostname related commands have been disabled."
+  fi
 }
 
 # The ugly group of redirects below solve the issue where tmux/epoll causes tmux
@@ -196,6 +223,9 @@ host_mode() {
     if [ $allow_host_change == "true" ]; then
       echo "    [n]   name: Set wemux hostname to supplied name."
       echo "    [r]  reset: Reset host to default: host"
+      if [ $allow_host_list == "true" ]; then
+        echo "    [l]   list: List all currently active wemux hosts."
+      fi
     fi
     echo "    [h]   help: Display this screen."
     echo "       no args: Start the wemux session/join an existing wemux session."
@@ -215,6 +245,7 @@ host_mode() {
       help|h)   display_host_commands;;
       name|n)   shift; change_host $@;;
       reset|r)  change_host host;;
+      list|l)   list_active_hosts;;
       *)        if ! $wemux $1; then
                   display_host_commands
                 fi;;
@@ -281,11 +312,14 @@ client_mode() {
     echo ""
     echo "    [m] mirror: Attach to Host in read-only mode."
     echo "    [p]   pair: Attach to Host in pair mode, which allows editing."
-    echo "    [l] logout: Log out of the current wemux pairing session."
+    echo "    [o] logout: Log out of the current wemux pairing session."
     echo ""
     if [ $allow_host_change == "true" ]; then
       echo "    [n]   name: Set name of wemux hostname you wish to connect to."
       echo "    [r]  reset: Reset host to default: host"
+      if [ $allow_host_list == "true" ]; then
+        echo "    [l]   list: List all currently active wemux hosts."
+      fi
     fi
     echo "    [h]   help: Display this screen."
     echo "       no args: Attach to pair session if it already exists, otherwise mirror."
@@ -300,11 +334,12 @@ client_mode() {
       mirror|m) announce_connection "mirror" mirror_mode;;
       pair|p)   announce_connection "pair" pair_mode;;
       edit|e)   announce_connection "pair" pair_mode;;
-      logout|l) logout_pair;;
+      logout|o) logout_pair;;
       stop|s)   logout_pair;;
       help|h)   display_client_commands;;
       name|n)   shift; change_host $@;;
       reset|r)  change_host host;;
+      list|l)   list_active_hosts;;
       *)        if ! $wemux $1; then
                   display_client_commands
                 fi;;

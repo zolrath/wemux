@@ -85,7 +85,7 @@ see you work, or
   <hostname>`. This allows multiple hosts on the same machine to host their own
   independent wemux sessions with their own clients.
 
-  This is not needed for most use cases.
+  This is not needed for most use cases but can be useful.
 
   wemux will remember the last host specified to in order to make reconnecting
   to the same hostname easy. `wemux help` will output the currently specified
@@ -113,9 +113,25 @@ see you work, or
 #### wemux reset
   Resets the wemux hostname to the default: host
 
+### Active Hostname List
+  To list the hostname of all currently running wemux servers run `wemux list`
+#### wemux list
+  List all currently active wemux hosts.
+
+    wemux host
+    Currently active wemux hosts:
+
+    1. ProjectX
+    2. dont-get-lost
+    3. host
+
+  Listing hostnames can be disabled by setting `allow_host_list="false"` in 
+  `/etc/wemux.conf`
+
 ## Configuration
-  There are a number of options that be configured in `/etc/wemux.conf`.  In
-  most cases the only option that must be changed is the `host_list` array.
+  There are a number of additional options that be configured in
+  `/etc/wemux.conf`.  In most cases the only option that must be changed is the
+  `host_list` array.
 
 ### Host Mode
   To have an account act as host, ensure that you have added their username to the
@@ -150,6 +166,8 @@ see you work, or
 
   The ability to change hostnames can be disabled entirely by setting
   `allow_host_change="false"`
+
+  Listing hostnames can be disabled by setting `allow_host_list="false"`
 
 ### Client Modes
 
