@@ -118,7 +118,7 @@ see you work, or
 #### wemux list
   List all currently active wemux hosts.
 
-    wemux host
+    wemux list
     Currently active wemux hosts:
 
     1. ProjectX
