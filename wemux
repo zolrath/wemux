@@ -100,9 +100,11 @@ list_active_hosts() {
       done
       echo ""
       echo "Current wemux hostname: $host"
+    # allow_host_list is disabled:
     else
       echo "Hostname listing has been disabled."
     fi
+  # allow_host_change is disabled:
   else
     echo "Hostname related commands have been disabled."
   fi
@@ -207,6 +209,7 @@ host_mode() {
     else
       echo "No wemux server running on $host."
     fi
+    # If the socket file exists:
     if [ -e $socket ]; then
       if rm $socket; then
         echo "Removed $socket."
@@ -224,6 +227,8 @@ host_mode() {
     if [ $allow_host_change == "true" ]; then
       echo "The current wemux hostname is set to $host"
     fi
+    echo ""
+    echo "Usage: wemux [command]"
     echo "To host a wemux session please use one of the following:"
     echo ""
     echo "    [s]  start: Start the wemux session/join an existing wemux session."
@@ -320,6 +325,8 @@ client_mode() {
     if [ $allow_host_change == "true" ]; then
       echo "The current wemux hostname is set to $host"
     fi
+    echo ""
+    echo "Usage: wemux [command]"
     echo "To connect to wemux please use one of the following:"
     echo ""
     echo "    [m] mirror: Attach to Host in read-only mode."
