@@ -78,18 +78,16 @@ see you work, or
   `wemux list-sessions` is equivalent to entering `tmux -S /tmp/wemux-host
   list-sessions`
 
-## Short-form Commands
+### Short-form Commands
   All commands have a short form. s for start, a for attach, p for pair etc.
   For a complete list, type `wemux help` (or `wemux h`)
 
-## Multi-Host Capabilities
+# Multi-Host Capabilities
+********************************************************************************
   wemux supports specifying the wemux session hostname via `wemux name
   <hostname>`. This allows multiple hosts on the same machine to host their own
   independent wemux sessions with their own clients. By default this option is
   disabled.
-
-  Changing hostnames can be enabled by setting `allow_host_change="true"` in
-  `/etc/wemux.conf`
 
   wemux will remember the last host specified to in order to make reconnecting
   to the same hostname easy. `wemux help` will output the currently specified
@@ -132,7 +130,8 @@ see you work, or
   Listing hostnames can be disabled by setting `allow_host_list="false"` in
   `/etc/wemux.conf`
 
-## Configuration
+# Configuration
+********************************************************************************
   There are a number of additional options that be configured in
   `/etc/wemux.conf`.  In most cases the only option that must be changed is the
   `host_list` array.
@@ -158,8 +157,8 @@ see you work, or
 
 ### Changing Hostnames
 
-  The ability to change hostnames can be disabled entirely by setting
-  `allow_host_change="false"`
+  The ability to change hostnames can be enabled by setting
+  `allow_host_change="true"`
 
 ### Listing Hostnames
 
