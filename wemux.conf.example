@@ -1,6 +1,8 @@
 ## wemux Configuration:
+## wemux version 1.8.2
 ##
-## Uncomment an option if you would like to change it from its default setting.
+## Uncomment an option (remove the # in front of it) if you would like to change
+## the option from its default setting.
 
 ####### HOST OPTIONS #######
 
