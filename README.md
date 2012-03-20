@@ -11,18 +11,18 @@ the option of:
 see you work, or
 
 **Pairing** allows the client and yourself to work in the same terminal (shared
-    cursor) or work independently in another window (separate cursors) in the
-    same tmux session.
+cursor) or work independently in another window (separate cursors) in the same 
+tmux session.
 
 ## How To Install
   The rest of this readme will operate under the assumption you'll place wemux
   in `wemux/` in your `/usr/local/share` directory. To make wemux available for
   all users, perform the following steps, using sudo as required:
 
-  Git clone this repo.
-
+  Git clone this repo.  
+  
     git clone git://github.com/zolrath/wemux.git /usr/local/share/wemux
-
+  
   Symlink the `wemux` file into your $PATH such as `/usr/local/bin/`,
   being sure to use the full path.
 
@@ -47,7 +47,8 @@ see you work, or
   Use `wemux stop` to kill the wemux session and remove the /tmp/wemux-host
   socket.
 #### wemux config
-  Use `wemux config` to open `/etc/wemux.conf` in your $EDITOR. 
+  Use `wemux config` to open `/etc/wemux.conf` in your $EDITOR.  
+  Note this only works if you have the environment variable EDITOR configured.
 #### wemux
   When `wemux` is run without any arguments in host mode, it is just like
   running wemux start.  It will reattach to an existing wemux session if it
