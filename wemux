@@ -41,6 +41,7 @@ version="1.8.0"
 host_list=(root)
 socket_prefix="/tmp/wemux"
 options="-u"
+allow_pair_mode="true"
 default_client_mode="mirror"
 allow_host_change="true"
 allow_host_list="true"
@@ -232,40 +233,40 @@ host_mode() {
     echo "Usage: wemux [command]"
     echo "To host a wemux session please use one of the following:"
     echo ""
-    echo "    [s]  start: Start the wemux session/join an existing wemux session."
-    echo "    [a] attach: Join an existing wemux session."
-    echo "    [k]   stop: Kill the wemux session, delete the socket."
+    echo "    [s]       start: Start the wemux session/join an existing wemux session."
+    echo "    [a]      attach: Join an existing wemux session."
+    echo "    [k]        stop: Kill the wemux session, delete the socket."
     echo ""
     if [ $allow_host_change == "true" ]; then
-      echo "    [n]   name: Set wemux hostname to supplied name."
-      echo "    [r]  reset: Reset host to default: host"
+      echo "    [n] name [name]: Set wemux hostname to supplied name."
+      echo "    [r]       reset: Reset host to default: host"
       if [ $allow_host_list == "true" ]; then
-        echo "    [l]   list: List all currently active wemux hosts."
+        echo "    [l]        list: List all currently active wemux hosts."
       fi
     fi
-    echo "    [h]   help: Display this screen."
-    echo "       no args: Start the wemux session/join an existing wemux session."
+    echo "    [h]        help: Display this screen."
+    echo "            no args: Start the wemux session/join an existing wemux session."
   }
 
   # Host mode command handling:
   # If no command given, call start server.
   if [ -z "$1" ]; then
-    announce_connection host start_server
+    announce_connection "host" start_server
   else
     case "$1" in
-      start|s)  announce_connection host start_server;;
-      attach|a) announce_connection host reattach;;
-      join|j)   announce_connection host reattach;;
-      stop|st)  stop_server;;
-      kill|k)   stop_server;;
-      help|h)   display_host_commands;;
-      name|n)   shift; change_host $@;;
-      reset|r)  change_host host;;
-      list|l)   list_active_hosts;;
+      start|s)   announce_connection "host" start_server;;
+      attach|a)  announce_connection "host" reattach;;
+      join|j)    announce_connection "host" reattach;;
+      stop|st)   stop_server;;
+      kill|k)    stop_server;;
+      help|h)    display_host_commands;;
+      name|n)    shift; change_host $@;;
+      reset|r)   change_host host;;
+      list|l)    list_active_hosts;;
       version|v) display_version;;
-      *)        if ! $wemux $1; then
-                  display_host_commands
-                fi;;
+      *)         if ! $wemux $1; then
+                   display_host_commands
+                 fi;;
     esac
   fi
 }
@@ -284,26 +285,34 @@ client_mode() {
   # Pair mode, allows user to interact with wemux session.
   # Will connect to existing pair session or create one if necessary.
   pair_mode() {
-    if has_pair_session; then
-      $wemux attach -t $client_session
-    elif host_exists; then
-      $wemux new-session -d -t $host -s $client_session
-      $wemux new-window -n $USER
-      $wemux attach -t $client_session
+    if [ $allow_pair_mode == "true" ]; then
+      if has_pair_session; then
+        $wemux attach -t $client_session
+      elif host_exists; then
+        $wemux new-session -d -t $host -s $client_session
+        $wemux new-window -n $USER
+        $wemux attach -t $client_session
+      else
+        echo "No wemux session to pair with on $host."
+      fi
     else
-      echo "No wemux session to pair with on $host."
+      echo "Pair mode is disabled."
     fi
   }
 
   # Log user out of pair mode, allows them to wemux pair HOSTNAME with another.
   logout_pair() {
-    if has_pair_session; then
-      [ $announce_attach == "true" ] && $wemux display-message \
-        "$USER has logged out of pair mode."
-      $wemux kill-session -t $client_session
-      echo "Logged out of pair mode with $host."
+    if [ $allow_pair_mode == "true" ]; then
+      if has_pair_session; then
+        [ $announce_attach == "true" ] && $wemux display-message \
+          "$USER has logged out of pair mode."
+        $wemux kill-session -t $client_session
+        echo "Logged out of pair mode with $host."
+      else
+        echo "No wemux session to log out of with $host."
+      fi
     else
-      echo "No wemux session to log out of with $host."
+      echo "Pair mode is disabled."
     fi
   }
 
@@ -314,7 +323,13 @@ client_mode() {
     if [ $default_client_mode == "pair" ] && [ $allow_pair_mode == "true" ]; then
         announce_connection "pair" pair_mode
     else
-      echo "No wemux session to attach to on $host."
+      if has_pair_session && [ $allow_pair_mode == "true" ]; then
+        announce_connection "pair" $wemux attach -t $client_session
+      elif host_exists; then
+        announce_connection "mirror" $wemux attach -t $host -r
+      else
+        echo "No wemux session to attach to on $host."
+      fi
     fi
   }
 
@@ -328,19 +343,25 @@ client_mode() {
     echo "Usage: wemux [command]"
     echo "To connect to wemux please use one of the following:"
     echo ""
-    echo "    [m] mirror: Attach to Host in read-only mode."
-    echo "    [p]   pair: Attach to Host in pair mode, which allows editing."
-    echo "    [o] logout: Log out of the current wemux pairing session."
+    echo "    [m]      mirror: Attach to host in read-only mode."
+    if [ $allow_pair_mode == "true" ]; then
+      echo "    [p]        pair: Attach to host in pair mode, which allows editing."
+      echo "    [o]      logout: Log out of the current wemux pairing session."
+    fi
     echo ""
     if [ $allow_host_change == "true" ]; then
-      echo "    [n]   name: Set name of wemux hostname you wish to connect to."
-      echo "    [r]  reset: Reset host to default: host"
+      echo "    [n] name [name]: Set name of wemux hostname you wish to connect to."
+      echo "    [r]       reset: Reset host to default: host"
       if [ $allow_host_list == "true" ]; then
-        echo "    [l]   list: List all currently active wemux hosts."
+        echo "    [l]        list: List all currently active wemux hosts."
       fi
     fi
-    echo "    [h]   help: Display this screen."
-    echo "       no args: Attach to pair session if it already exists, otherwise mirror."
+    if [ $allow_pair_mode == "true" ]; then
+      echo "    [h]        help: Display this screen."
+      echo "            no args: Attach to pair session if it already exists, otherwise mirror."
+    else
+      echo "            no args: Attach to host in mirror mode."
+    fi
   }
 
   # Client mode command handling:
@@ -349,19 +370,19 @@ client_mode() {
     smart_reattach
   else
     case "$1" in
-      mirror|m) announce_connection "mirror" mirror_mode;;
-      pair|p)   announce_connection "pair" pair_mode;;
-      edit|e)   announce_connection "pair" pair_mode;;
-      logout|o) logout_pair;;
-      stop|s)   logout_pair;;
-      help|h)   display_client_commands;;
-      name|n)   shift; change_host $@;;
-      reset|r)  change_host host;;
-      list|l)   list_active_hosts;;
+      mirror|m)  announce_connection "mirror" mirror_mode;;
+      pair|p)    announce_connection "pair" pair_mode;;
+      edit|e)    announce_connection "pair" pair_mode;;
+      logout|o)  logout_pair;;
+      stop|s)    logout_pair;;
+      help|h)    display_client_commands;;
+      name|n)    shift; change_host $@;;
+      reset|r)   change_host host;;
+      list|l)    list_active_hosts;;
       version|v) display_version;;
-      *)        if ! $wemux $1; then
-                  display_client_commands
-                fi;;
+      *)         if ! $wemux $1; then
+                   display_client_commands
+                 fi;;
     esac
   fi
 }
