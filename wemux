@@ -1,6 +1,6 @@
 #!/bin/bash
 # wemux by Matt Furden @zolrath
-# version 1.7.0
+# version 1.8.0
 #
 # wemux allows you to start a shared tmux session using the command 'wemux'.
 # Clients have the option of mirroring, which will give them read-only access,
@@ -32,6 +32,9 @@
 # wemux list  : List all currently active wemux hosts.
 
 ###############################################################################
+
+# Current wemux version.
+version="1.8.0"
 
 # Setup and Configuration Files.
 # Default settings, modify them in the /etc/wemux.conf file:
@@ -170,6 +173,12 @@ change_host() {
   return 0
 }
 
+# Display version of wemux installed on system. Show URL for wemux.
+display_version() {
+  echo "wemux $version"
+  echo "To check for a newer version visit: http://www.github.com/zolrath/wemux"
+}
+
 # Host mode, used when user is listed in the host_list array in /etc/wemux.conf
 host_mode() {
   # Start the server if it doesn't exist, otherwise reattach.
@@ -211,6 +220,7 @@ host_mode() {
 
   # Display the commands available in host mode.
   display_host_commands() {
+    echo "wemux version $version"
     if [ $allow_host_change == "true" ]; then
       echo "The current wemux hostname is set to $host"
     fi
@@ -246,6 +256,7 @@ host_mode() {
       name|n)   shift; change_host $@;;
       reset|r)  change_host host;;
       list|l)   list_active_hosts;;
+      version|v) display_version;;
       *)        if ! $wemux $1; then
                   display_host_commands
                 fi;;
@@ -305,6 +316,7 @@ client_mode() {
 
   # Display the commands available in client mode.
   display_client_commands() {
+    echo "wemux version $version"
     if [ $allow_host_change == "true" ]; then
       echo "The current wemux hostname is set to $host"
     fi
@@ -340,6 +352,7 @@ client_mode() {
       name|n)   shift; change_host $@;;
       reset|r)  change_host host;;
       list|l)   list_active_hosts;;
+      version|v) display_version;;
       *)        if ! $wemux $1; then
                   display_client_commands
                 fi;;
