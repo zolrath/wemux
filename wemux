@@ -1,6 +1,6 @@
 #!/bin/bash
 # wemux by Matt Furden @zolrath
-# version 1.8.1
+# version 1.8.2
 #
 # wemux allows you to start a shared tmux session using the command 'wemux'.
 # Clients have the option of mirroring, which will give them read-only access,
@@ -36,7 +36,7 @@
 ###############################################################################
 
 # Current wemux version.
-version="1.8.1"
+version="1.8.2"
 
 # Setup and Configuration Files.
 # Default settings, modify them in the /etc/wemux.conf file:
@@ -107,10 +107,12 @@ list_active_hosts() {
     # allow_host_list is disabled:
     else
       echo "Hostname listing has been disabled."
+      return 126
     fi
   # allow_host_change is disabled:
   else
     echo "Hostname related commands have been disabled."
+    return 126
   fi
 }
 
@@ -174,7 +176,7 @@ change_host() {
     fi
   else
     echo "Changing hostnames has been disabled."
-    return 1
+    return 126
   fi
   return 0
 }
@@ -301,6 +303,7 @@ client_mode() {
       fi
     else
       echo "Pair mode is disabled."
+      return 126
     fi
   }
 
@@ -317,6 +320,7 @@ client_mode() {
       fi
     else
       echo "Pair mode is disabled."
+      return 126
     fi
   }
 
