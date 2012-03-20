@@ -8,8 +8,16 @@
 # host_list=(zolrath csagan brocksamson)
 host_list=(root)
 
-# Allow users to change their hostname for multi-host environments.
-# Defaults to "true"
+## When clients enter 'wemux' with no arguments by default it will attempt to
+## join an existing pair mode session, if there is no pair session it will start
+## a mirror mode session.
+## By setting default_client_mode to "pair", 'wemux' with no arguments will always
+## join a pair mode session, even if it has to create it.
+## Defaults to "mirror"
+# default_client_mode="pair"
+
+## Allow users to change their hostname for multi-host environments.
+## Defaults to "true"
 # allow_host_change="false"
 
 # Allow users to list all currently running wemux sockets/hostnames.

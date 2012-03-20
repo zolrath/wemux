@@ -41,6 +41,7 @@ version="1.8.0"
 host_list=(root)
 socket_prefix="/tmp/wemux"
 options="-u"
+default_client_mode="mirror"
 allow_host_change="true"
 allow_host_list="true"
 announce_attach="true"
@@ -310,10 +311,8 @@ client_mode() {
   # If pair mode session exists, reattach to it.
   # If no pair mode session exists, mirror the host.
   smart_reattach() {
-    if has_pair_session; then
-      announce_connection "pair" $wemux attach -t $client_session
-    elif host_exists; then
-      announce_connection "mirror" $wemux attach -t $host -r
+    if [ $default_client_mode == "pair" ] && [ $allow_pair_mode == "true" ]; then
+        announce_connection "pair" pair_mode
     else
       echo "No wemux session to attach to on $host."
     fi
