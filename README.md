@@ -46,6 +46,8 @@ see you work, or
 #### wemux stop
   Use `wemux stop` to kill the wemux session and remove the /tmp/wemux-host
   socket.
+#### wemux config
+  Use `wemux config` to open `/etc/wemux.conf` in your $EDITOR. 
 #### wemux
   When `wemux` is run without any arguments in host mode, it is just like
   running wemux start.  It will reattach to an existing wemux session if it
@@ -134,7 +136,8 @@ see you work, or
 ********************************************************************************
   There are a number of additional options that be configured in
   `/etc/wemux.conf`.  In most cases the only option that must be changed is the
-  `host_list` array.
+  `host_list` array. To open your wemux configuration file, you can either open
+  `/etc/wemux.conf` manually or run `wemux config`
 
 ### Host Mode
   To have an account act as host, ensure that you have added their username to the

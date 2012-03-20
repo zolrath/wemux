@@ -1,6 +1,6 @@
 #!/bin/bash
 # wemux by Matt Furden @zolrath
-# version 1.8.0
+# version 1.8.1
 #
 # wemux allows you to start a shared tmux session using the command 'wemux'.
 # Clients have the option of mirroring, which will give them read-only access,
@@ -18,6 +18,7 @@
 # wemux start : Start the wemux session/join an existing wemux session.
 # wemux attach: Join an existing wemux session.
 # wemux stop  : Stop the wemux server, delete the socket.
+# wemux config: Open the wemux configuration file in your $EDITOR."
 # wemux help  : Display the help screen.
 #
 # WEMUX CLIENT COMMANDS:
@@ -35,7 +36,7 @@
 ###############################################################################
 
 # Current wemux version.
-version="1.8.0"
+version="1.8.1"
 
 # Setup and Configuration Files.
 # Default settings, modify them in the /etc/wemux.conf file:
@@ -245,6 +246,7 @@ host_mode() {
         echo "    [l]        list: List all currently active wemux hosts."
       fi
     fi
+    echo "    [c]      config: Open the wemux configuration file in $EDITOR."
     echo "    [h]        help: Display this screen."
     echo "            no args: Start the wemux session/join an existing wemux session."
   }
@@ -265,6 +267,7 @@ host_mode() {
       reset|r)   change_host host;;
       list|l)    list_active_hosts;;
       version|v) display_version;;
+      conf*|c)   $EDITOR /etc/wemux.conf;;
       *)         if ! $wemux $1; then
                    display_host_commands
                  fi;;
