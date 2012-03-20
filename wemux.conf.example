@@ -1,12 +1,16 @@
 ## wemux Configuration:
 ##
 ## Uncomment an option if you would like to change it from its default setting.
-##
+
+####### HOST OPTIONS #######
+
 ## All usernames in host_list will use wemux in host mode, allowing
 ## them to create wemux sessions for other users to attach to.
 ## Add the usernames of users who should use wemux in host mode:
 ## example: host_list=(zolrath csagan brocksamson)
 host_list=(root)
+
+####### CLIENT OPTIONS #######
 
 ## Allow users to attach to the wemux session in pair mode.
 ## When set to false, clients will only be able to attach in mirror mode.
@@ -21,13 +25,18 @@ host_list=(root)
 ## Defaults to "mirror"
 # default_client_mode="pair"
 
+####### MULTI-HOST OPTIONS #######
+
 ## Allow users to change their hostname for multi-host environments.
-## Defaults to "true"
-# allow_host_change="false"
+## Defaults to "false"
+# allow_host_change="true"
 
 ## Allow users to list all currently running wemux sockets/hostnames.
+## Automatically disabled if allow_host_change="false"
 ## Defaults to "true"
 # allow_host_list="false"
+
+####### ANNOUNCEMENT OPTIONS #######
 
 ## Announce when users attach/detach from a tmux session.
 ## Defaults to "true"
@@ -36,6 +45,8 @@ host_list=(root)
 ## Announce when users change the wemux hostname they are using.
 ## Defaults to "true"
 # announce_host_change="false"
+
+####### OTHER OPTIONS #######
 
 ## Location of tmux socket, will have host name appended to end:
 ## Defaults to "/tmp/wemux"

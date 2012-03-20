@@ -12,7 +12,7 @@
 #
 # For environments with multiple hosts running their own independent sessions
 # on the same machine wemux can change its hostname with the wemux name command.
-# This can be disabled in the configuration file.
+# This can be enabled in the configuration file.
 #
 # WEMUX HOST COMMANDS:
 # wemux start : Start the wemux session/join an existing wemux session.
@@ -26,6 +26,7 @@
 # wemux logout: Log out of the wemux pairing session.
 # wemux help  : Display the help screen.
 #
+# To enable multi-host commands, set allow_host_change="true" in wemux.conf
 # WEMUX HOSTNAME COMMANDS: can be run by either host or client.
 # wemux name  : Change hostname of wemux session.
 # wemux reset : Reset host to default: host
@@ -43,7 +44,7 @@ socket_prefix="/tmp/wemux"
 options="-u"
 allow_pair_mode="true"
 default_client_mode="mirror"
-allow_host_change="true"
+allow_host_change="false"
 allow_host_list="true"
 announce_attach="true"
 announce_host_change="true"

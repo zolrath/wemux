@@ -68,6 +68,8 @@ see you work, or
   wemux session in mirror mode.
   * If the client has already started a wemux pair mode session, it will
   reattach to the session in pair mode.
+  * By setting `default_client_mode="pair"` in `wemux.conf` this can be changed
+  to always join in pair mode, even if a pair session doesn't already exist.
 
 #### Other Commands
   wemux passes commands it doesn't understand through to tmux with the correct
@@ -83,15 +85,17 @@ see you work, or
 ## Multi-Host Capabilities
   wemux supports specifying the wemux session hostname via `wemux name
   <hostname>`. This allows multiple hosts on the same machine to host their own
-  independent wemux sessions with their own clients.
+  independent wemux sessions with their own clients. By default this option is
+  disabled.
 
-  This is not needed for most use cases but can be useful.
+  Changing hostnames can be enabled by setting `allow_host_change="true"` in
+  `/etc/wemux.conf`
 
   wemux will remember the last host specified to in order to make reconnecting
   to the same hostname easy. `wemux help` will output the currently specified
   hostname along with the wemux command list.
 
-  Changing hostnames can be disabled by setting `allow_host_change="false"` in 
+  Changing hostnames can be enabled by setting `allow_host_change="true"` in
   `/etc/wemux.conf`
 
 ### Specifying Hostname
@@ -125,7 +129,7 @@ see you work, or
     2. dont-get-lost
     3. host
 
-  Listing hostnames can be disabled by setting `allow_host_list="false"` in 
+  Listing hostnames can be disabled by setting `allow_host_list="false"` in
   `/etc/wemux.conf`
 
 ## Configuration
@@ -138,6 +142,28 @@ see you work, or
   `/etc/wemux.conf` file's `host_list` array.
 
     host_list=(zolrath hostusername csagan brocksampson)
+
+### Pair Mode
+  Pair mode can be disabled, only allowing clients to attach to the server in
+  mirror mode by setting `allow_pair_mode="false"`
+
+### Default Client Mode
+ When clients enter 'wemux' with no arguments by default it will first attempt to
+ join an existing pair mode session. If there is no pair session it will start
+ a mirror mode session.
+ By setting default_client_mode to "pair", 'wemux' with no arguments will always
+ join a pair mode session, even if it has to create it.
+
+  This can be changed by setting `default_client_mode="pair"`
+
+### Changing Hostnames
+
+  The ability to change hostnames can be disabled entirely by setting
+  `allow_host_change="false"`
+
+### Listing Hostnames
+
+  Listing hostnames can be disabled by setting `allow_host_list="false"`
 
 ### Announcements
   When a user joins a session in either mirror or pair mode, a message is
@@ -164,12 +190,7 @@ see you work, or
 
   This can be disabled by setting `announce_host_change="false"`
 
-  The ability to change hostnames can be disabled entirely by setting
-  `allow_host_change="false"`
-
-  Listing hostnames can be disabled by setting `allow_host_list="false"`
-
-### Client Modes
+### Automatic SSH Client Modes
 
   To make an SSHed user start in a wemux mode automatically, add one of the
   following lines to the users `.bash_profile` or `.zshrc`
