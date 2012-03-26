@@ -1,6 +1,6 @@
 #!/bin/bash
 # wemux by Matt Furden @zolrath
-# version 1.9.0
+# version 1.9.1
 #
 # wemux allows you to start a shared tmux session using the command 'wemux'.
 # Clients have the option of mirroring, which will give them read-only access,
@@ -153,7 +153,7 @@ status_users() {
 list_users() {
   if [ $allow_user_list == "true" ]; then
     users="$(wemux status_users)"
-    if [ -z $users ]; then
+    if [ -z "$users" ]; then
       echo "No wemux users connected."
     else
       echo "Connected wemux Users: "
