@@ -11,7 +11,7 @@ the option of:
 see you work, or
 
 **Pairing** allows the client and yourself to work in the same terminal (shared
-cursor) or work independently in another window (separate cursors) in the same 
+cursor) or work independently in another window (separate cursors) in the same
 tmux session.
 
 ## How To Install
@@ -19,10 +19,10 @@ tmux session.
   in `wemux/` in your `/usr/local/share` directory. To make wemux available for
   all users, perform the following steps, using sudo as required:
 
-  Git clone this repo.  
-  
+  Git clone this repo.
+
     git clone git://github.com/zolrath/wemux.git /usr/local/share/wemux
-  
+
   Symlink the `wemux` file into your $PATH such as `/usr/local/bin/`,
   being sure to use the full path.
 
@@ -47,7 +47,7 @@ tmux session.
   Use `wemux stop` to kill the wemux session and remove the /tmp/wemux-host
   socket.
 #### wemux config
-  Use `wemux config` to open `/etc/wemux.conf` in your $EDITOR.  
+  Use `wemux config` to open `/etc/wemux.conf` in your $EDITOR.
   Note this only works if you have the environment variable EDITOR configured.
 #### wemux
   When `wemux` is run without any arguments in host mode, it is just like
@@ -80,6 +80,40 @@ tmux session.
 
   `wemux list-sessions` is equivalent to entering `tmux -S /tmp/wemux-host
   list-sessions`
+
+## User List
+  wemux can display a list of connected users, indicating users in mirror mode
+  with [m] at the end of their name.
+
+  If you'd like to see a list of all users currently connected to the wemux
+  session, you have three options:
+
+### wemux users
+  Enter `wemux users` in the terminal to display a list of all currently
+  connected wemux users.
+
+    wemux users
+    Connected wemux Users:
+    zolrath, csagan[m]
+
+### Status Bar
+  You can add the user list to your status bar by adding #(wemux status_users)
+  where you see fit by editing your `~/tmux.conf` file.
+
+    set -g status-right "#(wemux status_users)"
+
+### Display Message
+  If you'd rather display users on command via a tmux message, similar to the
+  user attachment/detachment messages, by editing your `~/tmux.conf` file.
+  Pick whatever key you'd like to bind it to. Using t as an example:
+
+    unbind t
+    bind t run-shell 'wemux display_users'
+
+  Note that the tmux prefix should be pressed before t to activate the command.
+
+  User listing can be disabled by setting `allow_user_list="false"` in
+  `wemux.conf`
 
 ### Short-form Commands
   All commands have a short form. s for start, a for attach, p for pair etc.
@@ -167,6 +201,11 @@ tmux session.
 ### Listing Hostnames
 
   Listing hostnames can be disabled by setting `allow_host_list="false"`
+
+### Listing Users
+
+  Listing users can be disabled by setting `allow_user_list="false"` in
+  `wemux.conf`
 
 ### Announcements
   When a user joins a session in either mirror or pair mode, a message is

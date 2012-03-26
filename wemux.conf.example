@@ -1,5 +1,5 @@
 ## wemux Configuration:
-## wemux version 1.8.2
+## wemux version 1.9.0
 ##
 ## Uncomment an option (remove the # in front of it) if you would like to change
 ## the option from its default setting.
@@ -39,6 +39,10 @@ host_list=(root)
 # allow_host_list="false"
 
 ####### ANNOUNCEMENT OPTIONS #######
+
+## Allow users to see list of currently connected wemux users.
+## Defaults to "true"
+# allow_user_list="false"
 
 ## Announce when users attach/detach from a tmux session.
 ## Defaults to "true"

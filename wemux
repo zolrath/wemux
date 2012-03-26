@@ -1,6 +1,6 @@
 #!/bin/bash
 # wemux by Matt Furden @zolrath
-# version 1.8.2
+# version 1.9.0
 #
 # wemux allows you to start a shared tmux session using the command 'wemux'.
 # Clients have the option of mirroring, which will give them read-only access,
@@ -18,6 +18,7 @@
 # wemux start : Start the wemux session/join an existing wemux session.
 # wemux attach: Join an existing wemux session.
 # wemux stop  : Stop the wemux server, delete the socket.
+# wemux users : List the currently connected wemux users.
 # wemux config: Open the wemux configuration file in your $EDITOR."
 # wemux help  : Display the help screen.
 #
@@ -25,6 +26,7 @@
 # wemux mirror: Attach to Host in read-only mode.
 # wemux pair  : Attach to Host in pair mode, which allows editing.
 # wemux logout: Log out of the wemux pairing session.
+# wemux users : List the currently connected wemux users.
 # wemux help  : Display the help screen.
 #
 # To enable multi-host commands, set allow_host_change="true" in wemux.conf
@@ -36,7 +38,7 @@
 ###############################################################################
 
 # Current wemux version.
-version="1.8.2"
+version="1.9.0"
 
 # Setup and Configuration Files.
 # Default settings, modify them in the /etc/wemux.conf file:
@@ -47,6 +49,7 @@ allow_pair_mode="true"
 default_client_mode="mirror"
 allow_host_change="false"
 allow_host_list="true"
+allow_user_list="true"
 announce_attach="true"
 announce_host_change="true"
 
@@ -114,6 +117,51 @@ list_active_hosts() {
     echo "Hostname related commands have been disabled."
     return 126
   fi
+}
+
+# Tmux status line uses global variables, until something is changed this won't
+# work for filtering users from the user list.
+# set_current_user() {
+#   `$wemux set-environment -t $client_session CURRENT_WEMUX_USER $(whoami)`
+# }
+
+# List users currently connected to wemux sessions. Username[m] for mirror mode.
+# Only contains names. Formatted for being included as part of status bar.
+status_users() {
+  if [ $allow_user_list == "true" ]; then
+    while IFS= read line; do
+      read name mode <<<$(echo $line)
+      # Get user associated with tty
+      name=`stat -f%Su $name`
+      # If user is attached in read-only mode, set mode to [m]
+      [[ $mode == 0 ]] && mode="" || mode="[m]"
+      # If user/mode is already is userlist, do not add them again.
+      if ! [[ "$users" =~ "$name$mode " ]]; then
+        users="$users$name$mode, "
+      fi
+    done < <(wemux list-clients -F "#{client_tty},#{client_readonly}" | tr ',' ' ')
+    # Strip last two characters ', '
+    echo "${users%??}"
+  else
+    echo "User list disabled."
+    return 126
+  fi
+}
+
+# List users currently connected to wemux session with informative string.
+# More verbose, intended for use in terminal.
+list_users() {
+  if [ $allow_user_list == "true" ]; then
+    echo "Connected wemux Users: "
+    echo "$(wemux status_users)"
+  else
+    echo "User listing has been disabled."
+  fi
+}
+
+# Display the currently attached users verbosely in a tmux message.
+display_users() {
+    redirect=`$wemux display-message "$(wemux users)" 2>&1`
 }
 
 # The ugly group of redirects below solve the issue where tmux/epoll causes tmux
@@ -248,6 +296,9 @@ host_mode() {
         echo "    [l]        list: List all currently active wemux hosts."
       fi
     fi
+    if [ $allow_user_list == "true" ]; then
+      echo "    [u]       users: List all users currently connected to wemux."
+    fi
     echo "    [c]      config: Open the wemux configuration file in $EDITOR."
     echo "    [h]        help: Display this screen."
     echo "            no args: Start the wemux session/join an existing wemux session."
@@ -259,20 +310,23 @@ host_mode() {
     announce_connection "host" start_server
   else
     case "$1" in
-      start|s)   announce_connection "host" start_server;;
-      attach|a)  announce_connection "host" reattach;;
-      join|j)    announce_connection "host" reattach;;
-      stop|st)   stop_server;;
-      kill|k)    stop_server;;
-      help|h)    display_host_commands;;
-      name|n)    shift; change_host $@;;
-      reset|r)   change_host host;;
-      list|l)    list_active_hosts;;
-      version|v) display_version;;
-      conf*|c)   $EDITOR /etc/wemux.conf;;
-      *)         if ! $wemux $@; then
-                   display_host_commands
-                 fi;;
+      start|s)       announce_connection "host" start_server;;
+      attach|a)      announce_connection "host" reattach;;
+      join|j)        announce_connection "host" reattach;;
+      stop|st)       stop_server;;
+      kill|k)        stop_server;;
+      help|h)        display_host_commands;;
+      name|n)        shift; change_host $@;;
+      reset|r)       change_host host;;
+      list|l)        list_active_hosts;;
+      users|u)       list_users;;
+      status_users)  status_users;;
+      display_users) display_users;;
+      version|v)     display_version;;
+      conf*|c)       $EDITOR /etc/wemux.conf;;
+      *)             if ! $wemux $@; then
+                       display_host_commands
+                     fi;;
     esac
   fi
 }
@@ -296,6 +350,7 @@ client_mode() {
         $wemux attach -t $client_session
       elif host_exists; then
         $wemux new-session -d -t $host -s $client_session
+        set_current_user
         $wemux new-window -n $USER
         $wemux attach -t $client_session
       else
@@ -364,8 +419,11 @@ client_mode() {
         echo "    [l]        list: List all currently active wemux hosts."
       fi
     fi
+    if [ $allow_user_list == "true" ]; then
+      echo "    [u]       users: List all users currently connected to wemux."
+    fi
+    echo "    [h]        help: Display this screen."
     if [ $allow_pair_mode == "true" ]; then
-      echo "    [h]        help: Display this screen."
       echo "            no args: Attach to pair session if it already exists, otherwise mirror."
     else
       echo "            no args: Attach to host in mirror mode."
@@ -378,19 +436,22 @@ client_mode() {
     smart_reattach
   else
     case "$1" in
-      mirror|m)  announce_connection "mirror" mirror_mode;;
-      pair|p)    announce_connection "pair" pair_mode;;
-      edit|e)    announce_connection "pair" pair_mode;;
-      logout|o)  logout_pair;;
-      stop|s)    logout_pair;;
-      help|h)    display_client_commands;;
-      name|n)    shift; change_host $@;;
-      reset|r)   change_host host;;
-      list|l)    list_active_hosts;;
-      version|v) display_version;;
-      *)         if ! $wemux $@; then
-                   display_client_commands
-                 fi;;
+      mirror|m)      announce_connection "mirror" mirror_mode;;
+      pair|p)        announce_connection "pair" pair_mode;;
+      edit|e)        announce_connection "pair" pair_mode;;
+      logout|o)      logout_pair;;
+      stop|s)        logout_pair;;
+      help|h)        display_client_commands;;
+      name|n)        shift; change_host $@;;
+      reset|r)       change_host host;;
+      list|l)        list_active_hosts;;
+      users|u)       list_users;;
+      status_users)  status_users;;
+      display_users) display_users;;
+      version|v)     display_version;;
+      *)             if ! $wemux $@; then
+                       display_client_commands
+                     fi;;
     esac
   fi
 }
@@ -403,11 +464,19 @@ user_is_a_host() {
   return 1
 }
 
+allowed_nested_command() {
+  commands=(users u display_users status_users list-clients version v)
+  for command in "${commands[@]}"; do
+    [[ "$command" == $1 ]] && return 0
+  done
+  return 1
+}
+
 # Create $wemux variable.
 build_wemux_prefix
 
 # Don't allow wemux to be run directly within a wemux session.
-if [[ "$TMUX" != *$socket* ]]; then
+if [[ "$TMUX" != *$socket* ]] || allowed_nested_command $1 ; then
   # If user is in host list, use host mode. If not, use client mode.
   if user_is_a_host; then
     host_mode "$@"
