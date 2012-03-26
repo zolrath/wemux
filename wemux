@@ -270,7 +270,7 @@ host_mode() {
       list|l)    list_active_hosts;;
       version|v) display_version;;
       conf*|c)   $EDITOR /etc/wemux.conf;;
-      *)         if ! $wemux $1; then
+      *)         if ! $wemux $@; then
                    display_host_commands
                  fi;;
     esac
@@ -388,7 +388,7 @@ client_mode() {
       reset|r)   change_host host;;
       list|l)    list_active_hosts;;
       version|v) display_version;;
-      *)         if ! $wemux $1; then
+      *)         if ! $wemux $@; then
                    display_client_commands
                  fi;;
     esac
