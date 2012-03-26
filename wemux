@@ -152,8 +152,13 @@ status_users() {
 # More verbose, intended for use in terminal.
 list_users() {
   if [ $allow_user_list == "true" ]; then
-    echo "Connected wemux Users: "
-    echo "$(wemux status_users)"
+    users="$(wemux status_users)"
+    if [ -z $users ]; then
+      echo "No wemux users connected."
+    else
+      echo "Connected wemux Users: "
+      echo $users
+    fi
   else
     echo "User listing has been disabled."
   fi
