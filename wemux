@@ -1,6 +1,6 @@
 #!/bin/bash
 # wemux by Matt Furden @zolrath
-# version 1.9.1
+# version 1.9.2
 #
 # wemux allows you to start a shared tmux session using the command 'wemux'.
 # Clients have the option of mirroring, which will give them read-only access,
@@ -38,7 +38,7 @@
 ###############################################################################
 
 # Current wemux version.
-version="1.9.0"
+version="1.9.2"
 
 # Setup and Configuration Files.
 # Default settings, modify them in the /etc/wemux.conf file:
@@ -151,13 +151,18 @@ status_users() {
 # List users currently connected to wemux session with informative string.
 # More verbose, intended for use in terminal.
 list_users() {
+    redirect=`wemux server-info 2>&1`; server_running=$?
   if [ $allow_user_list == "true" ]; then
-    users="$(wemux status_users)"
-    if [ -z "$users" ]; then
-      echo "No wemux users connected."
+    if [ $server_running == 0 ]; then
+      users="$(wemux status_users)"
+      if [ -z "$users" ]; then
+        echo "No wemux users connected to $host."
+      else
+        echo "wemux Users Connected to $host: "
+        echo $users
+      fi
     else
-      echo "Connected wemux Users: "
-      echo $users
+      echo "No wemux server running on $host. No server, no users!"
     fi
   else
     echo "User listing has been disabled."
@@ -331,6 +336,7 @@ host_mode() {
       conf*|c)       $EDITOR /etc/wemux.conf;;
       *)             if ! $wemux $@; then
                        display_host_commands
+                       exit 127
                      fi;;
     esac
   fi
@@ -456,6 +462,7 @@ client_mode() {
       version|v)     display_version;;
       *)             if ! $wemux $@; then
                        display_client_commands
+                       exit 127
                      fi;;
     esac
   fi
