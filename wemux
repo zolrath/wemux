@@ -155,9 +155,9 @@ status_users() {
 # List users currently connected to wemux session with informative string.
 # More verbose, intended for use in terminal.
 list_users() {
+  if [ "$allow_user_list" == "true" ]; then
     redirect=`wemux server-info 2>&1`; server_running=$?
-  if [ $allow_user_list == "true" ]; then
-    if [ $server_running == 0 ]; then
+    if [ "$server_running" == 0 ]; then
       users="$(wemux status_users)"
       if [ -z "$users" ]; then
         echo "No wemux users connected to $host."
