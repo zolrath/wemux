@@ -121,50 +121,50 @@ tmux session.
 
 # Multi-Host Capabilities
 ********************************************************************************
-  wemux supports specifying the wemux session hostname via `wemux name
-  <hostname>`. This allows multiple hosts on the same machine to host their own
+  wemux supports specifying the wemux session name via `wemux name
+  <sessionname>`. This allows multiple hosts on the same machine to host their own
   independent wemux sessions with their own clients. By default this option is
   disabled.
 
-  wemux will remember the last host specified to in order to make reconnecting
-  to the same hostname easy. `wemux help` will output the currently specified
-  hostname along with the wemux command list.
+  wemux will remember the last session specified to in order to make reconnecting
+  to the same session easy. `wemux help` will output the currently specified
+  session along with the wemux command list.
 
-  Changing hostnames can be enabled by setting `allow_host_change="true"` in
+  Changing sessions can be enabled by setting `allow_session_change="true"` in
   `/etc/wemux.conf`
 
-### Specifying Hostname
-  To change the wemux hostname run `wemux name <hostname>`
+### Specifying Session Name
+  To change the wemux session run `wemux name <session>`
 
     wemux name ProjectX
-    # wemux hostname is now ProjectX
+    # wemux session is now ProjectX
     wemux start
     wemux
     wemux stop
     wemux reset
-    # wemux hostname is now host
+    # wemux session is now host
 
-#### wemux name *hostname*
-    Changes wemux hostname to specified name.
+#### wemux name *sessionname*
+    Changes wemux session to specified name.
 
-### Resetting the Hostname
-  In order to easily return to the default hostname you can run `wemux reset`
+### Resetting the Session Name
+  In order to easily return to the default session you can run `wemux reset`
 #### wemux reset
-  Resets the wemux hostname to the default: host
+  Resets the wemux session to the default: host
 
-### Active Hostname List
-  To list the hostname of all currently running wemux servers run `wemux list`
+### Active Session List
+  To list the name of all currently running wemux sessions run `wemux list`
 #### wemux list
-  List all currently active wemux hosts.
+  List all currently active wemux sessions.
 
     wemux list
-    Currently active wemux hosts:
+    Currently active wemux sessions:
 
     1. ProjectX
     2. dont-get-lost
     3. host
 
-  Listing hostnames can be disabled by setting `allow_host_list="false"` in
+  Listing sessions can be disabled by setting `allow_session_list="false"` in
   `/etc/wemux.conf`
 
 # Configuration
@@ -181,7 +181,7 @@ tmux session.
     host_list=(zolrath hostusername csagan brocksampson)
 
 ### Pair Mode
-  Pair mode can be disabled, only allowing clients to attach to the server in
+  Pair mode can be disabled, only allowing clients to attach to the session in
   mirror mode by setting `allow_pair_mode="false"`
 
 ### Default Client Mode
@@ -193,14 +193,14 @@ tmux session.
 
   This can be changed by setting `default_client_mode="pair"`
 
-### Changing Hostnames
+### Changing Sessions
 
-  The ability to change hostnames can be enabled by setting
-  `allow_host_change="true"`
+  The ability to change sessions can be enabled by setting
+  `allow_session_change="true"`
 
-### Listing Hostnames
+### Listing Sessions
 
-  Listing hostnames can be disabled by setting `allow_host_list="false"`
+  Listing sessions can be disabled by setting `allow_session_list="false"`
 
 ### Listing Users
 
@@ -216,21 +216,21 @@ tmux session.
 
  This can be disabled by setting `announce_attach="false"`
 
- In addition, when a user switches from one host to another via the `wemux name
- <hostname>` command, their movement is displayed similarly to the attach
+ In addition, when a user switches from one session to another via the `wemux name
+ <sessionname>` command, their movement is displayed similarly to the attach
  messages.
 
-  If csagan enters `wemux name applepie` the users on the default hostname
+  If csagan enters `wemux name applepie` the users on the default session
   `host` will see:
 
-    csagan has switched to hostname: applepie
+    csagan has switched to session: applepie
 
-  If csagan returns to default hostname with: `wemux reset` users on `host`
+  If csagan returns to default session with: `wemux reset` users on `host`
   will see:
 
-    csagan has joined this hostname.
+    csagan has joined this session.
 
-  This can be disabled by setting `announce_host_change="false"`
+  This can be disabled by setting `announce_session_change="false"`
 
 ### Automatic SSH Client Modes
 
