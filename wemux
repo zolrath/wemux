@@ -52,6 +52,8 @@ allow_host_list="true"
 allow_user_list="true"
 announce_attach="true"
 announce_host_change="true"
+# Prevents users from changing their $USER env variable to become host.
+username=`whoami`
 
 # Load configuration options from /etc/wemux.conf
 [ -f /etc/wemux.conf ] && . /etc/wemux.conf
@@ -88,7 +90,7 @@ load_hostname() {
 build_wemux_prefix() {
   load_hostname
   # Set client's pair mode session name.
-  client_session="$host-$USER"
+  client_session="$host-$username"
   # Set socket to include hostname.
   socket="${socket_prefix}-$host"
   # Set $wemux to wemux session file.
@@ -211,10 +213,10 @@ kill_server_successful() {
 announce_connection() {
   connection_type=$1; shift; attach_commands="$@"
   [ "$announce_attach" == "true" ] && redirect=`$wemux display-message \
-    "$USER has attached in $connection_type mode." 2>&1`
+    "$username has attached in $connection_type mode." 2>&1`
   $attach_commands
   [ "$announce_attach" == "true" ] && redirect=`$wemux display-message \
-    "$USER has detached." 2>&1`
+    "$username has detached." 2>&1`
   return 0
 }
 
@@ -233,13 +235,13 @@ change_host() {
       echo "Your hostname is already set to $host"
     else
       [ "$announce_host_change" == "true" ] && redirect=`$wemux display-message \
-        "$USER has switched to hostname: $newhost" 2>&1`
+        "$username has switched to hostname: $newhost" 2>&1`
       echo "Changed wemux hostname from $oldhost to $newhost"
       host=$newhost
       echo $host > ~/.wemux_last_host
       build_wemux_prefix
       [ "$announce_host_change" == "true" ] && redirect=`$wemux display-message \
-        "$USER has joined this hostname." 2>&1`
+        "$username has joined this hostname." 2>&1`
     fi
   else
     echo "Changing hostnames has been disabled."
@@ -370,8 +372,7 @@ client_mode() {
         $wemux attach -t $client_session
       elif host_exists; then
         $wemux new-session -d -t $host -s $client_session
-        set_current_user
-        $wemux new-window -n $USER
+        $wemux new-window -n $username
         $wemux attach -t $client_session
       else
         echo "No wemux session to pair with on $host."
@@ -387,7 +388,7 @@ client_mode() {
     if [ "$allow_pair_mode" == "true" ]; then
       if has_pair_session; then
         [ "$announce_attach" == "true" ] && $wemux display-message \
-          "$USER has logged out of pair mode."
+          "$username has logged out of pair mode."
         $wemux kill-session -t $client_session
         echo "Logged out of pair mode with $host."
       else
@@ -480,7 +481,7 @@ client_mode() {
 # Check if current user is listed in the host_list.
 user_is_a_host() {
   for user in "${host_list[@]}"; do
-    [[ "$user" == "$USER" ]] && return 0
+    [[ "$user" == "$username" ]] && return 0
   done
   return 1
 }
