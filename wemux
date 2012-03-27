@@ -54,6 +54,8 @@ announce_attach="true"
 announce_host_change="true"
 # Prevents users from changing their $USER env variable to become host.
 username=`whoami`
+# Set $EDITOR to default to vi if not configured on host machine.
+EDITOR=${EDITOR:="vi"}
 
 # Load configuration options from /etc/wemux.conf
 [ -f /etc/wemux.conf ] && . /etc/wemux.conf
