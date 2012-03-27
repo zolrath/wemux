@@ -102,7 +102,7 @@ list_active_hosts() {
   if [ "$allow_host_change" == "true" ]; then
     if [ "$allow_host_list" == "true" ]; then
       wemux_host_sockets=$socket_prefix*
-      for socket in "$wemux_host_sockets"; do
+      for socket in $wemux_host_sockets; do
         redirect=`tmux -S $socket server-info 2>&1`; server_running=$?
         if [ "$server_running" == 0 ]; then
           num=$[num+1]
