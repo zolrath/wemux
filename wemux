@@ -141,9 +141,9 @@ list_active_hosts() {
 status_users() {
   if [ "$allow_user_list" == "true" ]; then
     while IFS= read line; do
-      read name mode <<<$(echo $line)
+      read tty mode <<<$(echo $line)
       # Get user associated with tty
-      name=`stat -f%Su $name`
+      name=`stat -f%Su $tty` || name=`stat -c%U $tty`
       # If user is attached in read-only mode, set mode to [m]
       [[ $mode == 0 ]] && mode="" || mode="[m]"
       # If user/mode is already is userlist, do not add them again.
