@@ -93,7 +93,7 @@ tmux session.
   connected wemux users.
 
     $ wemux users
-    Connected wemux Users:
+    Users connected to host:
     zolrath, csagan[m]
 
 ### Status Bar
