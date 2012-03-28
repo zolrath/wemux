@@ -32,9 +32,9 @@ tmux session.
 
     cp /usr/local/share/wemux/wemux.conf.example /etc/wemux.conf
 
-  To set a user as host add their username to the host_list in `/etc/wemux.conf`
+  Then set a user as host add their username to the host_list in `/etc/wemux.conf`
 
-    host_list=(zolrath csagan brocksampson)
+    host_list=(zolrath brocksamson)
 
 ## Host Commands
 #### wemux start
@@ -47,7 +47,7 @@ tmux session.
   Use `wemux stop` to kill the wemux session and remove the /tmp/wemux-host
   socket.
 #### wemux kick *username*
-  Use `wemux kick <username>` to kick an SSH user from ther server and remove
+  Use `wemux kick <username>` to kick an SSH user from the server and remove
   their wemux pair sessions.
 #### wemux config
   Use `wemux config` to open `/etc/wemux.conf` in your $EDITOR.
@@ -180,7 +180,7 @@ tmux session.
   To have an account act as host, ensure that you have added their username to the
   `/etc/wemux.conf` file's `host_list` array.
 
-    host_list=(zolrath hostusername csagan brocksampson)
+    host_list=(zolrath hostusername brocksamson)
 
 ### Pair Mode
   Pair mode can be disabled, only allowing clients to attach to the session in
@@ -207,7 +207,7 @@ tmux session.
   `wemux.conf`
 
 ### Kicking SSH Users
-  Kicking SSH users from the server  can be disabled by setting
+  Kicking SSH users from the server can be disabled by setting
   `allow_kick_user="false"` in `wemux.conf`
 
 ### Announcements
