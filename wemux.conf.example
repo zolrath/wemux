@@ -1,5 +1,5 @@
 ## wemux Configuration:
-## wemux version 1.9.0
+## wemux version 2.0.0
 ##
 ## Uncomment an option (remove the # in front of it) if you would like to change
 ## the option from its default setting.
@@ -29,14 +29,14 @@ host_list=(root)
 
 ####### MULTI-HOST OPTIONS #######
 
-## Allow users to change their hostname for multi-host environments.
+## Allow users to change their session for multi-host environments.
 ## Defaults to "false"
-# allow_host_change="true"
+# allow_session_change="true"
 
-## Allow users to list all currently running wemux sockets/hostnames.
-## Automatically disabled if allow_host_change="false"
+## Allow users to list all currently running wemux sockets/sessions.
+## Automatically disabled if allow_session_change="false"
 ## Defaults to "true"
-# allow_host_list="false"
+# allow_session_list="false"
 
 ####### ANNOUNCEMENT OPTIONS #######
 
@@ -48,13 +48,13 @@ host_list=(root)
 ## Defaults to "true"
 # announce_attach="false"
 
-## Announce when users change the wemux hostname they are using.
+## Announce when users change the wemux session they are using.
 ## Defaults to "true"
-# announce_host_change="false"
+# announce_session_change="false"
 
 ####### OTHER OPTIONS #######
 
-## Location of tmux socket, will have host name appended to end:
+## Location of tmux socket, will have session name appended to end:
 ## Defaults to "/tmp/wemux"
 # socket-prefix="/tmp/wemux"
 
