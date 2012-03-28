@@ -176,12 +176,20 @@ list_users() {
   if [ "$allow_user_list" == "true" ]; then
     redirect=`wemux server-info 2>&1`; session_running=$?
     if [ "$session_running" == 0 ]; then
+      # Get list of users with status_users function.
       users="$(wemux status_users)"
-      if [ -z "$users" ]; then
-        echo "No wemux users connected to $session."
+      # Number each user, give it its own line.
+      for user in $users; do
+          num=$[num+1]
+          user=`echo "$user" | sed -e "s/,//"`
+          user_list="$user_list$num. $user\n"
+      done
+      if [ -z "$user_list" ]; then
+        echo "No wemux users connected to '$session'."
       else
-        echo "Users connected to $session: "
-        echo "$users"
+        echo "Users connected to '$session': "
+        # Remove last newline.
+        echo -e "${user_list%??}"
       fi
     else
       echo "No wemux session running on '$session'. No session, no users!"
