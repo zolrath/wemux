@@ -96,8 +96,9 @@ tmux session.
   connected wemux users.
 
     $ wemux users
-    Users connected to host:
-    zolrath, csagan[m]
+    Users connected to 'host':
+      1. furd
+      2. csagan[m]
 
 ### Status Bar
   You can add the user list to your status bar by adding #(wemux status_users)
@@ -139,13 +140,13 @@ tmux session.
 ### Joining Different wemux Sessions
   To change the wemux session run `wemux join <session>`
 
-    $ wemux join ProjectX
-    Changed wemux session from host to ProjectX
+    $ wemux join Project X
+    Changed wemux session from 'host' to 'project-x'
     $ wemux start
     $ wemux
     $ wemux stop
     $ wemux reset
-    Changed wemux session from ProjectX to host
+    Changed wemux session from 'project-x' to 'host'
 #### wemux join *sessionname*
     Join wemux session with specified name.
 
@@ -161,10 +162,9 @@ tmux session.
 
     $ wemux list
     Currently active wemux sessions:
-
-    1. ProjectX
-    2. dont-get-lost
-    3. host
+      1. project-x
+      2. host    <- current session
+      3. dont-get-lost
 
   Listing sessions can be disabled by setting `allow_session_list="false"` in
   `/etc/wemux.conf`
