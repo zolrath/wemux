@@ -92,7 +92,7 @@ tmux session.
   Enter `wemux users` in the terminal to display a list of all currently
   connected wemux users.
 
-    wemux users
+    $ wemux users
     Connected wemux Users:
     zolrath, csagan[m]
 
@@ -136,13 +136,13 @@ tmux session.
 ### Specifying Session Name
   To change the wemux session run `wemux name <session>`
 
-    wemux name ProjectX
-    # wemux session is now ProjectX
-    wemux start
-    wemux
-    wemux stop
-    wemux reset
-    # wemux session is now host
+    $ wemux name ProjectX
+    Changed wemux session from host to ProjectX
+    $ wemux start
+    $ wemux
+    $ wemux stop
+    $ wemux reset
+    Changed wemux session from ProjectX to host
 
 #### wemux name *sessionname*
     Changes wemux session to specified name.
@@ -157,7 +157,7 @@ tmux session.
 #### wemux list
   List all currently active wemux sessions.
 
-    wemux list
+    $ wemux list
     Currently active wemux sessions:
 
     1. ProjectX
