@@ -32,15 +32,17 @@ tmux session.
 
     cp /usr/local/share/wemux/wemux.conf.example /etc/wemux.conf
 
-  Then set a user as host add their username to the host_list in `/etc/wemux.conf`
+  Then set a user to be a wemux host by adding their username to the host_list in
+  `/etc/wemux.conf`. Users in the host_list will be able to start new wemux
+  sessions, all other users will be wemux clients and join these sessions.
 
     host_list=(zolrath brocksamson)
 
 ## Host Commands
 #### wemux start
-  Use `wemux start` to start a wemux session, chmod /tmp/wemux-host to 1777 and
-  attach to it.  If a wemux session already exists, it will attach to it
-  instead.
+  Use `wemux start` to start a wemux session, chmod /tmp/wemux-host to 1777 so
+  that other users may connect to it, and attach to it.  If a wemux session
+  already exists, it will attach to it instead.
 #### wemux attach
   Use `wemux attach` to attach to an existing wemux session.
 #### wemux stop
