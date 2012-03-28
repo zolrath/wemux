@@ -111,20 +111,24 @@ list_active_sessions() {
       wemux_session_sockets=$socket_prefix*
       for wemux_session in $wemux_session_sockets; do
         redirect=`tmux -S $wemux_session server-info 2>&1`; session_running=$?
+        # Number each active session, give it its own line.
         if [ "$session_running" == 0 ]; then
           num=$[num+1]
           session_name=`echo "$wemux_session" | sed -e "s,$socket_prefix-,,"`
-          session_list="$session_list\n$num. $session_name "
+          # Add indicator for current wemux session.
+          if [ "$session_name" == "$session" ]; then
+            session_name="$session_name    <- current session"
+          fi
+          session_list="$session_list$num. $session_name\n"
         fi
       done
       if [ -z "$session_list" ]; then
         echo "No wemux sessions currently active."
       else
         echo "Currently active wemux sessions:"
-        echo -e "$session_list"
+        # Remove last newline
+        echo -e "${session_list%??}"
       fi
-      echo ""
-      echo "Current wemux session name: $session"
     # allow_session_list is disabled:
     else
       echo "Session listing has been disabled."
