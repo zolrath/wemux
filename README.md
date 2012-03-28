@@ -42,7 +42,7 @@ tmux session.
   attach to it.  If a wemux session already exists, it will attach to it
   instead.
 #### wemux attach
-  Use `wemux attach` to join an existing wemux session.
+  Use `wemux attach` to attach to an existing wemux session.
 #### wemux stop
   Use `wemux stop` to kill the wemux session and remove the /tmp/wemux-host
   socket.
@@ -121,7 +121,7 @@ tmux session.
 
 # Multi-Host Capabilities
 ********************************************************************************
-  wemux supports specifying the wemux session name via `wemux name
+  wemux supports specifying the joining different wemux sessions via `wemux join
   <sessionname>`. This allows multiple hosts on the same machine to host their own
   independent wemux sessions with their own clients. By default this option is
   disabled.
@@ -133,24 +133,23 @@ tmux session.
   Changing sessions can be enabled by setting `allow_session_change="true"` in
   `/etc/wemux.conf`
 
-### Specifying Session Name
-  To change the wemux session run `wemux name <session>`
+### Joining Different wemux Sessions
+  To change the wemux session run `wemux join <session>`
 
-    $ wemux name ProjectX
+    $ wemux join ProjectX
     Changed wemux session from host to ProjectX
     $ wemux start
     $ wemux
     $ wemux stop
     $ wemux reset
     Changed wemux session from ProjectX to host
-
-#### wemux name *sessionname*
-    Changes wemux session to specified name.
+#### wemux join *sessionname*
+    Join wemux session with specified name.
 
 ### Resetting the Session Name
   In order to easily return to the default session you can run `wemux reset`
 #### wemux reset
-  Resets the wemux session to the default: host
+  Joins the default wemux session: host
 
 ### Active Session List
   To list the name of all currently running wemux sessions run `wemux list`
@@ -194,16 +193,13 @@ tmux session.
   This can be changed by setting `default_client_mode="pair"`
 
 ### Changing Sessions
-
   The ability to change sessions can be enabled by setting
   `allow_session_change="true"`
 
 ### Listing Sessions
-
   Listing sessions can be disabled by setting `allow_session_list="false"`
 
 ### Listing Users
-
   Listing users can be disabled by setting `allow_user_list="false"` in
   `wemux.conf`
 
@@ -216,11 +212,11 @@ tmux session.
 
  This can be disabled by setting `announce_attach="false"`
 
- In addition, when a user switches from one session to another via the `wemux name
- <sessionname>` command, their movement is displayed similarly to the attach
- messages.
+ In addition, when a user switches from one session to another via the `wemux
+ join <sessionname>` command, their movement is displayed similarly to the
+ attach messages.
 
-  If csagan enters `wemux name applepie` the users on the default session
+  If csagan enters `wemux join applepie` the users on the default session
   `host` will see:
 
     csagan has switched to session: applepie
@@ -233,7 +229,6 @@ tmux session.
   This can be disabled by setting `announce_session_change="false"`
 
 ### Automatic SSH Client Modes
-
   To make an SSHed user start in a wemux mode automatically, add one of the
   following lines to the users `.bash_profile` or `.zshrc`
 

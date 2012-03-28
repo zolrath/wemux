@@ -1,5 +1,5 @@
 ## wemux Configuration:
-## wemux version 2.0.0
+## wemux version 2.1.0
 ##
 ## Uncomment an option (remove the # in front of it) if you would like to change
 ## the option from its default setting.
@@ -26,6 +26,11 @@ host_list=(root)
 ## join a pair mode session, even if it has to create it.
 ## Defaults to "mirror"
 # default_client_mode="pair"
+
+## Allow hosts to kick SSH users from the server and remove the kicked users
+## wemux sessions.
+## Defaults to "true"
+# allow_user_kick="false"
 
 ####### MULTI-HOST OPTIONS #######
 

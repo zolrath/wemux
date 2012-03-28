@@ -1,6 +1,6 @@
 #!/bin/bash
 # wemux by Matt Furden @zolrath
-# version 2.0.0
+# version 2.1.0
 #
 # wemux allows you to start a shared tmux session using the command 'wemux'.
 # Clients have the option of mirroring, which will give them read-only access,
@@ -19,6 +19,7 @@
 # wemux attach: Join an existing wemux session.
 # wemux stop  : Stop the wemux session, delete the socket.
 # wemux users : List the currently connected wemux users.
+# wemux kick  : Disconnect an SSH user, remove their wemux session.
 # wemux config: Open the wemux configuration file in your $EDITOR.
 # wemux help  : Display the help screen.
 #
@@ -38,7 +39,7 @@
 ###############################################################################
 
 # Current wemux version.
-version="2.0.0"
+version="2.1.0"
 
 # Setup and Configuration Files.
 # Default settings, modify them in the /etc/wemux.conf file:
@@ -47,6 +48,7 @@ socket_prefix="/tmp/wemux"
 options="-u"
 allow_pair_mode="true"
 default_client_mode="mirror"
+allow_kick_user="true"
 allow_session_change="false"
 allow_session_list="true"
 allow_user_list="true"
@@ -300,6 +302,27 @@ host_mode() {
     fi
   }
 
+  # Kick an SSH user off the server and remove their pair session if it exists.
+  kick_user() {
+    if [ "$allow_kick_user" == "true" ]; then
+      kicked_user=$1
+      # Get sshd process with users name and get its PID.
+      user_pid=`ps aux | grep "$kicked_user.*sshd" | grep -v grep | tr -s ' ' | cut -d ' ' -f 2`
+      echo "Kicking $kicked_user from the server. Sudo required."
+      # Kill the sshd process of the supplied user.
+      redirect=`sudo kill -9 $user_pid 2>&1`; kicked_successfully=$?
+      # Remove any tmux sessions ending in "-kicked_user"
+      `wemux kill-session -t "*-$kicked_user" > /dev/null 2>&1`
+      if [ "$kicked_successfully" == 0 ]; then
+        echo "$kicked_user kicked successfully!"
+      else
+        echo "$kicked_user was not kicked. Are you sure they're connected?"
+      fi
+    else
+      echo "Kicking users has been disabled."
+    fi
+  }
+
   # Stop the wemux session and remove the socket file.
   stop_session() {
     if kill_session_successful; then
@@ -343,6 +366,9 @@ host_mode() {
     if [ "$allow_user_list" == "true" ]; then
       echo "    [u]       users: List all users currently connected to '$session'."
     fi
+    if [ "$allow_kick_user" == "true" ]; then
+      echo "               kick: Disconnect an SSH user, remove their wemux session."
+    fi
     echo ""
     echo "    [c]      config: Open the wemux configuration file in $EDITOR."
     echo "    [h]        help: Display this screen."
@@ -365,6 +391,7 @@ host_mode() {
       reset|r)       change_session host;;
       list|l)        list_active_sessions;;
       users|u)       list_users;;
+      kick)          kick_user $2;;
       status_users)  status_users;;
       display_users) display_users;;
       version|v)     display_version;;
@@ -516,7 +543,8 @@ user_is_a_host() {
 }
 
 allowed_nested_command() {
-  commands=(users u display_users status_users list-clients version v)
+  commands=(users u list l display_users status_users list-clients
+  kill-sesssion kick version v)
   for command in "${commands[@]}"; do
     [[ "$command" == "$1" ]] && return 0
   done
