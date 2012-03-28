@@ -46,6 +46,9 @@ tmux session.
 #### wemux stop
   Use `wemux stop` to kill the wemux session and remove the /tmp/wemux-host
   socket.
+#### wemux kick *username*
+  Use `wemux kick <username>` to kick an SSH user from ther server and remove
+  their wemux pair sessions.
 #### wemux config
   Use `wemux config` to open `/etc/wemux.conf` in your $EDITOR.
   Note this only works if you have the environment variable EDITOR configured.
@@ -202,6 +205,10 @@ tmux session.
 ### Listing Users
   Listing users can be disabled by setting `allow_user_list="false"` in
   `wemux.conf`
+
+### Kicking SSH Users
+  Kicking SSH users from the server  can be disabled by setting
+  `allow_kick_user="false"` in `wemux.conf`
 
 ### Announcements
   When a user joins a session in either mirror or pair mode, a message is

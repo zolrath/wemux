@@ -30,7 +30,7 @@ host_list=(root)
 ## Allow hosts to kick SSH users from the server and remove the kicked users
 ## wemux sessions.
 ## Defaults to "true"
-# allow_user_kick="false"
+# allow_kick_user="false"
 
 ####### MULTI-HOST OPTIONS #######
 
