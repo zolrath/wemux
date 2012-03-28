@@ -19,7 +19,7 @@
 # wemux attach: Join an existing wemux session.
 # wemux stop  : Stop the wemux session, delete the socket.
 # wemux users : List the currently connected wemux users.
-# wemux config: Open the wemux configuration file in your $EDITOR."
+# wemux config: Open the wemux configuration file in your $EDITOR.
 # wemux help  : Display the help screen.
 #
 # WEMUX CLIENT COMMANDS:
@@ -253,6 +253,7 @@ change_session() {
     elif [ "$new_session" == "$old_session" ]; then
       echo "Your wemux session is already set to '$session'"
     else
+      # Announce that the user has changed sessions to current session.
       [ "$announce_session_change" == "true" ] && redirect=`$wemux display-message \
         "$username has switched to session: $new_session" 2>&1`
       echo "Changed wemux session from '$old_session' to '$new_session'"
@@ -260,6 +261,7 @@ change_session() {
       echo $session > ~/.wemux_last_session
       # Rebuild wemux prefix for new session name.
       build_wemux_prefix
+      # Announce that the user has joined to new session.
       [ "$announce_session_change" == "true" ] && redirect=`$wemux display-message \
         "$username has joined this session" 2>&1`
     fi
@@ -282,6 +284,7 @@ host_mode() {
   start_session() {
     if ! session_exists; then
       $wemux new-session -d -s $session
+      # Open tmux socket to all users to allow clients to connect.
       chmod 1777 $socket
       echo "wemux session started on '$session'."
     fi
@@ -425,6 +428,7 @@ client_mode() {
   # If pair mode session exists, reattach to it.
   # If no pair mode session exists, mirror the host.
   smart_reattach() {
+    # If default_client_mode has been set to "pair" in wemux.conf:
     if [ "$default_client_mode" == "pair" ] && [ "$allow_pair_mode" == "true" ]; then
         announce_connection "pair" pair_mode
     else
