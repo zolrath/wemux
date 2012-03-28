@@ -62,12 +62,13 @@ editor=${EDITOR:="vi"}
 [ -f /etc/wemux.conf ] && . /etc/wemux.conf
 
 # Sanitize session name, replace spaces and underscores with dashes.
-# Remove all non alpha-numeric characters.
+# Remove all non alpha-numeric characters, convert to lowercase.
 sanitize_session_name() {
   local new_session=$@
   local new_session=${new_session// /\-}
   local new_session=${new_session//_/\-}
   local new_session=${new_session//[^a-zA-Z0-9\-]/}
+  local new_session=`echo "$new_session" | tr '[A-Z]' '[a-z]'`
   echo "$new_session"
 }
 
@@ -76,15 +77,18 @@ sanitize_session_name() {
 load_session_name() {
   if [ "$allow_session_change" == "true" ]; then
     if [ -f ~/.wemux_last_session ]; then
-      session=`cat ~/.wemux_last_session`
-      clean_session=`sanitize_session_name $session`
-      if ! [[ $session == $clean_session ]]; then
+      unclean_session=`cat ~/.wemux_last_session`
+      # Sanitize loaded session name.
+      session=`sanitize_session_name $unclean_session`
+      if ! [[ $unclean_session == $session ]]; then
         echo "$session" > ~/.wemux_last_session
       fi
     else
+      # If ~/.wemux_last_session doesn't exist set to 'host'
       session="host"
     fi
   else
+    # If allow_session_change is disabled, set to 'host'
     session="host"
   fi
 }
