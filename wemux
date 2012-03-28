@@ -11,7 +11,7 @@
 # Other configuations options are also located in /etc/wemux.conf
 #
 # For environments with multiple hosts running their own independent sessions
-# on the same machine wemux can change their session name with the wemux name
+# on the same machine wemux can join different sessions with the wemux join
 # command, if enabled. This can be enabled in the configuration file.
 #
 # WEMUX HOST COMMANDS:
@@ -31,8 +31,8 @@
 #
 # To enable multi-host commands, set allow_session_change="true" in wemux.conf
 # WEMUX SESSION COMMANDS: can be run by either host or client.
-# wemux name  : Change to another wemux session.
-# wemux reset : Reset session to default: host
+# wemux join  : Join wemux session with supplied name.
+# wemux reset : Join default wemux session: host
 # wemux list  : List all currently active wemux sessions.
 
 ###############################################################################
@@ -319,7 +319,7 @@ host_mode() {
     echo "    [k]        stop: Kill the wemux session '$session', delete its socket."
     echo ""
     if [ "$allow_session_change" == "true" ]; then
-      echo "    [n] name [name]: Set wemux session to supplied name."
+      echo "    [j] join [name]: Join the specified wemux session."
       echo "    [r]       reset: Join default wemux session: host"
       if [ "$allow_session_list" == "true" ]; then
         echo "    [l]        list: List all currently active wemux sessions."
@@ -342,10 +342,10 @@ host_mode() {
     case "$1" in
       start|s)       announce_connection "host" start_session;;
       attach|a)      announce_connection "host" reattach;;
-      join|j)        announce_connection "host" reattach;;
       stop|st)       stop_session;;
       kill|k)        stop_session;;
       help|h)        display_host_commands;;
+      join|j)        shift; change_session $@;;
       name|n)        shift; change_session $@;;
       reset|r)       change_session host;;
       list|l)        list_active_sessions;;
@@ -443,8 +443,8 @@ client_mode() {
     fi
     echo ""
     if [ "$allow_session_change" == "true" ]; then
-      echo "    [n] name [name]: Set name of wemux session you wish to connect to."
-      echo "    [r]       reset: Reset session to default: host"
+      echo "    [j] join [name]: Join the specified wemux session."
+      echo "    [r]       reset: Join default wemux session: host"
       if [ "$allow_session_list" == "true" ]; then
         echo "    [l]        list: List all currently active wemux sessions."
       fi
@@ -475,6 +475,7 @@ client_mode() {
       logout|o)      logout_pair;;
       stop|s)        logout_pair;;
       help|h)        display_client_commands;;
+      join|j)        shift; change_session $@;;
       name|n)        shift; change_session $@;;
       reset|r)       change_session host;;
       list|l)        list_active_sessions;;
