@@ -40,13 +40,13 @@ tmux session.
 
 ## Host Commands
 #### wemux start
-  Use `wemux start` to start a wemux session, chmod /tmp/wemux-host to 1777 so
+  Use `wemux start` to start a wemux session, chmod /tmp/wemux-wemux to 1777 so
   that other users may connect to it, and attach to it.  If a wemux session
   already exists, it will attach to it instead.
 #### wemux attach
   Use `wemux attach` to attach to an existing wemux session.
 #### wemux stop
-  Use `wemux stop` to kill the wemux session and remove the /tmp/wemux-host
+  Use `wemux stop` to kill the wemux session and remove the /tmp/wemux-wemux
   socket.
 #### wemux kick *username*
   Use `wemux kick <username>` to kick an SSH user from the server and remove
@@ -63,9 +63,9 @@ tmux session.
   All client commands notify the wemux session host that the user has
   attached/detached, and in what mode.
 #### wemux mirror
-  Use `wemux mirror` to attach to Host in read-only mode.
+  Use `wemux mirror` to attach to session in read-only mode.
 #### wemux pair
-  Use `wemux pair` to attach to Host in pair mode, which allows editing.
+  Use `wemux pair` to attach to session in pair mode, which allows editing.
 #### wemux logout
   Use `wemux logout` to remove your pair mode session.
 #### wemux
@@ -83,7 +83,7 @@ tmux session.
   wemux passes commands it doesn't understand through to tmux with the correct
   socket setting.
 
-  `wemux list-sessions` is equivalent to entering `tmux -S /tmp/wemux-host
+  `wemux list-sessions` is equivalent to entering `tmux -S /tmp/wemux-wemux
   list-sessions`
 
 ## User List
@@ -98,7 +98,7 @@ tmux session.
   connected wemux users.
 
     $ wemux users
-    Users connected to 'host':
+    Users connected to 'wemux':
       1. furd
       2. csagan[m]
 
@@ -143,11 +143,11 @@ tmux session.
   To change the wemux session run `wemux join <session>`
 
     $ wemux join Project X
-    Changed wemux session from 'host' to 'project-x'
+    Changed wemux session from 'wemux' to 'project-x'
     $ wemux
     $ wemux stop
     $ wemux reset
-    Changed wemux session from 'project-x' to 'host'
+    Changed wemux session from 'project-x' to 'wemux'
 #### wemux join *sessionname*
     Join wemux session with specified name.
 #### wemux join *sessionnumber*
@@ -159,7 +159,7 @@ tmux session.
 ### Resetting the Session Name
   In order to easily return to the default session you can run `wemux reset`
 #### wemux reset
-  Joins the default wemux session: host
+  Joins the default wemux session: wemux
 
 ### Active Session List
   To list the name of all currently running wemux sessions run `wemux list`
@@ -169,7 +169,7 @@ tmux session.
     $ wemux list
     Currently active wemux sessions:
       1. project-x
-      2. host    <- current session
+      2. wemux    <- current session
       3. dont-get-lost
 
   `wemux join` and `wemux stop` both accept either the name of a session, or
@@ -204,6 +204,12 @@ tmux session.
 
   This can be changed by setting `default_client_mode="pair"`
 
+### Default Session Name
+  The default wemux session name will be used with `wemux reset` and when
+  `allow_session_change` is not enabled in `wemux.conf`.
+
+  This can be changed by setting `default_session_name="customname"`
+
 ### Changing Sessions
   The ability to change sessions can be enabled by setting
   `allow_session_change="true"`
@@ -233,11 +239,11 @@ tmux session.
  attach messages.
 
   If csagan enters `wemux join applepie` the users on the default session
-  `host` will see:
+  `wemux` will see:
 
     csagan has switched to session: applepie
 
-  If csagan returns to default session with: `wemux reset` users on `host`
+  If csagan returns to default session with: `wemux reset` users on `wemux`
   will see:
 
     csagan has joined this session.
