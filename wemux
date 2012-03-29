@@ -1,6 +1,6 @@
 #!/bin/bash
 # wemux by Matt Furden @zolrath
-# version 2.2.0
+# version 2.2.1
 #
 # wemux allows you to start a shared tmux session using the command 'wemux'.
 # Clients have the option of mirroring, which will give them read-only access,
@@ -33,7 +33,7 @@
 # To enable multi-host commands, set allow_session_change="true" in wemux.conf
 # WEMUX SESSION COMMANDS: can be run by either host or client.
 # wemux join  : Join wemux session with supplied name.
-# wemux reset : Join default wemux session: host
+# wemux reset : Join default wemux session: wemux
 # wemux list  : List all currently active wemux sessions.
 
 ###############################################################################
@@ -74,8 +74,8 @@ sanitize_session_name() {
   echo "$new_session"
 }
 
-# Load the session name of last wemux session. If empty, set to host.
-# Ensure session name is 'host' if allow_session_change is disabled.
+# Load the session name of last wemux session. If empty, set to 'wemux'.
+# Ensure session name is 'wemux' if allow_session_change is disabled.
 load_session_name() {
   if [ "$allow_session_change" == "true" ]; then
     if [ -f ~/.wemux_last_session ]; then
@@ -86,12 +86,12 @@ load_session_name() {
         echo "$session" > ~/.wemux_last_session
       fi
     else
-      # If ~/.wemux_last_session doesn't exist set to 'host'
-      session="host"
+      # If ~/.wemux_last_session doesn't exist set to 'wemux'
+      session="wemux"
     fi
   else
-    # If allow_session_change is disabled, set to 'host'
-    session="host"
+    # If allow_session_change is disabled, set to 'wemux'
+    session="wemux"
   fi
 }
 
@@ -372,7 +372,7 @@ host_mode() {
     echo ""
     if [ "$allow_session_change" == "true" ]; then
       echo "    [j] join [name]: Join the specified wemux session."
-      echo "    [r]       reset: Join default wemux session: host"
+      echo "    [r]       reset: Join default wemux session: wemux"
       if [ "$allow_session_list" == "true" ]; then
         echo "    [l]        list: List all currently active wemux sessions."
       fi
@@ -402,7 +402,7 @@ host_mode() {
       help|h)        display_host_commands;;
       join|j)        shift; change_session $@;;
       name|n)        shift; change_session $@;;
-      reset|r)       change_session host;;
+      reset|r)       change_session "wemux";;
       list|l)        list_active_sessions;;
       users|u)       list_users;;
       kick)          kick_user $2;;
@@ -501,7 +501,7 @@ client_mode() {
     echo ""
     if [ "$allow_session_change" == "true" ]; then
       echo "    [j] join [name]: Join the specified wemux session."
-      echo "    [r]       reset: Join default wemux session: host"
+      echo "    [r]       reset: Join default wemux session: wemux"
       if [ "$allow_session_list" == "true" ]; then
         echo "    [l]        list: List all currently active wemux sessions."
       fi
@@ -534,7 +534,7 @@ client_mode() {
       help|h)        display_client_commands;;
       join|j)        shift; change_session $@;;
       name|n)        shift; change_session $@;;
-      reset|r)       change_session host;;
+      reset|r)       change_session "wemux";;
       list|l)        list_active_sessions;;
       users|u)       list_users;;
       status_users)  status_users;;
