@@ -99,7 +99,7 @@ tmux session.
 
     $ wemux users
     Users connected to 'wemux':
-      1. furd
+      1. zolrath
       2. csagan[m]
 
 ### Status Bar
@@ -128,7 +128,7 @@ tmux session.
 # Multi-Host Capabilities
 ********************************************************************************
   wemux supports specifying the joining different wemux sessions via `wemux join
-  <sessionname>`. This allows multiple hosts on the same machine to host their own
+  <session>`. This allows multiple hosts on the same machine to host their own
   independent wemux sessions with their own clients. By default this option is
   disabled.
 
@@ -140,26 +140,35 @@ tmux session.
   `/etc/wemux.conf`
 
 ### Joining Different wemux Sessions
-  To change the wemux session run `wemux join <session>`
+  To change the wemux session run `wemux join <session>`. The name will be sanitized to contain no spaces or uppercase letters.
 
     $ wemux join Project X
     Changed wemux session from 'wemux' to 'project-x'
+    $ wemux start
     $ wemux
     $ wemux stop
     $ wemux reset
     Changed wemux session from 'project-x' to 'wemux'
-#### wemux join *sessionname*
-    Join wemux session with specified name.
-#### wemux join *sessionnumber*
-    Alternatively, enter the session number displayed next to the session name
-    in `wemux list`.
 
-      $ wemux j 3
+#### wemux join *sessionname*
+  Join wemux session with specified name.
+
+    $ wemux join rails
+    Changed wemux session from 'wemux' to 'rails'
+
+#### wemux join *sessionnumber*
+  Alternatively, enter the session number displayed next to the session name in `wemux list`.
+
+    $ wemux j 1
+    Changed wemux session from 'rails' to 'project-x'
 
 ### Resetting the Session Name
   In order to easily return to the default session you can run `wemux reset`
 #### wemux reset
-  Joins the default wemux session: wemux
+  Joins the default wemux session: wemux (or value of default_session_name in wemux.conf)
+
+    $ wemux reset
+    Changed wemux session from 'project-x' to 'wemux'
 
 ### Active Session List
   To list the name of all currently running wemux sessions run `wemux list`
@@ -169,11 +178,11 @@ tmux session.
     $ wemux list
     Currently active wemux sessions:
       1. project-x
-      2. wemux    <- current session
-      3. dont-get-lost
+      2. rails
+      3. wemux    <- current session
 
-  `wemux join` and `wemux stop` both accept either the name of a session, or
-  the number indicated next to the session name in `wemux list`.
+  `wemux join` and `wemux stop` both accept either the name of a session or
+  the number indicated next to the name in `wemux list`.
 
   Listing sessions can be disabled by setting `allow_session_list="false"` in
   `/etc/wemux.conf`
