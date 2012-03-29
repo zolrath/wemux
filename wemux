@@ -223,7 +223,7 @@ has_pair_session() {
 
 # Returns true if session is successfully killed.
 kill_session_successful() {
-  redirect=`$wemux kill-server 2>&1`; killed_successfully=$?
+  redirect=`tmux -S $socket kill-server 2>&1`; killed_successfully=$?
   [ "$killed_successfully" == 0 ] && return 0 || return 1;
 }
 
