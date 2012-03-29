@@ -515,7 +515,8 @@ client_mode() {
     if [ "$default_client_mode" == "pair" ] && [ "$allow_pair_mode" == "true" ]; then
       echo "            no args: Attach to '$session' in pair mode, which allows editing."
     elif [ "$allow_pair_mode" == "true" ]; then
-      echo "            no args: Attach to pair session on '$session' if it already exists, otherwise mirror."
+      echo "            no args: Attach to pair session on '$session' if it already exists,"
+      echo "                     otherwise, attach in mirror mode."
     else
       echo "            no args: Attach to '$session' in mirror mode."
     fi
