@@ -38,7 +38,7 @@
 ###############################################################################
 
 # Current wemux version.
-version="2.2.2"
+version="2.2.3"
 
 # Setup and Configuration Files.
 # Default settings, modify them in the /etc/wemux.conf file:
@@ -159,12 +159,12 @@ status_users() {
       # Get user associated with tty
       name=`stat -f%Su $tty 2>/dev/null` || name=`stat -c%U $tty 2>/dev/null`
       # If user is attached in read-only mode, set mode to [m]
-      [[ $mode == 0 ]] && mode="" || mode="[m]"
+      [[ $mode == "(ro)" ]] && mode="[m]" || mode=""
       # If user/mode is already is userlist, do not add them again.
       if ! [[ "$users" =~ "$name$mode," ]]; then
         users="$users$name$mode, "
       fi
-    done < <(wemux list-clients -F "#{client_tty},#{client_readonly}" | tr ',' ' ')
+    done < <(wemux list-clients | cut -f1,6 -d ' ' | sed s/://)
     # Strip last two characters ', '
     echo "${users%??}"
   else
