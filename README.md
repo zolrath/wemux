@@ -144,13 +144,17 @@ tmux session.
 
     $ wemux join Project X
     Changed wemux session from 'host' to 'project-x'
-    $ wemux start
     $ wemux
     $ wemux stop
     $ wemux reset
     Changed wemux session from 'project-x' to 'host'
 #### wemux join *sessionname*
     Join wemux session with specified name.
+#### wemux join *sessionnumber*
+    Alternatively, enter the session number displayed next to the session name
+    in `wemux list`.
+
+      $ wemux j 3
 
 ### Resetting the Session Name
   In order to easily return to the default session you can run `wemux reset`
@@ -167,6 +171,9 @@ tmux session.
       1. project-x
       2. host    <- current session
       3. dont-get-lost
+
+  `wemux join` and `wemux stop` both accept either the name of a session, or
+  the number indicated next to the session name in `wemux list`.
 
   Listing sessions can be disabled by setting `allow_session_list="false"` in
   `/etc/wemux.conf`

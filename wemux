@@ -1,6 +1,6 @@
 #!/bin/bash
 # wemux by Matt Furden @zolrath
-# version 2.1.1
+# version 2.2.0
 #
 # wemux allows you to start a shared tmux session using the command 'wemux'.
 # Clients have the option of mirroring, which will give them read-only access,
@@ -39,7 +39,7 @@
 ###############################################################################
 
 # Current wemux version.
-version="2.1.1"
+version="2.2.0"
 
 # Setup and Configuration Files.
 # Default settings, modify them in the /etc/wemux.conf file:
@@ -250,6 +250,11 @@ change_session() {
     new_session=`sanitize_session_name $@`
     old_session=$session
 
+    # Get list of currently running sessions
+    session_names=(`echo $socket_prefix* | sed -e "s,$socket_prefix-,,g"`)
+    # If user joins a number, go to the session with that number in `wemux list`
+    [[ "$new_session" =~ ^[0-9]+$ ]] && new_session=${session_names[$new_session-1]}
+
     if [ -z "$new_session" ]; then
       echo "Current wemux session: $session"
     elif [ "$new_session" == "$old_session" ]; then
@@ -259,8 +264,7 @@ change_session() {
       [ "$announce_session_change" == "true" ] && redirect=`$wemux display-message \
         "$username has switched to session: $new_session" 2>&1`
       echo "Changed wemux session from '$old_session' to '$new_session'"
-      session=$new_session
-      echo $session > ~/.wemux_last_session
+      echo $new_session > ~/.wemux_last_session
       # Rebuild wemux prefix for new session name.
       build_wemux_prefix
       # Announce that the user has joined to new session.
@@ -325,20 +329,30 @@ host_mode() {
 
   # Stop the wemux session and remove the socket file.
   stop_session() {
+    session_sockets=(`echo $socket_prefix*`)
+    # If a specific session is supplied:
+    if [ $1 ]; then
+      # If user enters a number, stop the session with that number in `wemux list`
+      if [[ $@ =~ ^[0-9]+$ ]]; then
+        socket=${session_sockets[$1-1]}
+        session=`echo $socket | sed -e "s,$socket_prefix-,,g"`
+      # Otherwise, stop the session with the supplied name.
+      else
+        session=`sanitize_session_name $@`
+        socket="$socket_prefix-$session"
+      fi
+    fi
+    # If the user doesn't pass an argument, stop current session.
     if kill_session_successful; then
       echo "wemux session on '$session' stopped."
     else
-      echo "No wemux session running on '$session'."
+      echo "No wemux session running on '$session'"
     fi
     # If the socket file exists:
     if [ -e "$socket" ]; then
-      if rm $socket; then
-        echo "Removed '$socket'."
-      else
+      if ! rm $socket; then
         echo "Could not remove '$socket'. Please check file ownership."
       fi
-    else
-      echo "The wemux socket '$socket' does not exist."
     fi
   }
 
@@ -364,7 +378,7 @@ host_mode() {
       fi
     fi
     if [ "$allow_user_list" == "true" ]; then
-      echo "    [u]       users: List all users currently connected to '$session'."
+      echo "    [u]       users: List all users currently connected to '$session'"
     fi
     if [ "$allow_kick_user" == "true" ]; then
       echo "               kick: Disconnect an SSH user, remove their wemux session."
@@ -383,8 +397,8 @@ host_mode() {
     case "$1" in
       start|s)       announce_connection "host" start_session;;
       attach|a)      announce_connection "host" reattach;;
-      stop|st)       stop_session;;
-      kill|k)        stop_session;;
+      stop|st)       shift; stop_session $@;;
+      kill|k)        shift; stop_session $@;;
       help|h)        display_host_commands;;
       join|j)        shift; change_session $@;;
       name|n)        shift; change_session $@;;
