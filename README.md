@@ -1,4 +1,4 @@
-# wemux: Multi-User Tmux Sessions Made Easy
+![wemux: Multi-User Tmux Sessions Made Easy](http://i.imgur.com/iOjcz.png) 
 ********************************************************************************
 
 wemux allows you to start hosting a multi-user tmux session using the command
