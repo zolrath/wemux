@@ -1,0 +1,414 @@
+.TH "WEMUX" "1" "April 2012" "" ""
+.
+.SH "NAME"
+\fBwemux\fR \- multi\-user tmux sessions made easy
+.
+.SH "SYNOPSIS"
+Host or join multi\-user tmux sessions\.
+.
+.P
+WEMUX HOST COMMANDS
+.
+.br
+\fBwemux start\fR
+.
+.br
+\fBwemux attach\fR
+.
+.br
+\fBwemux stop\fR
+.
+.br
+\fBwemux users\fR
+.
+.br
+\fBwemux kick\fR
+.
+.br
+\fBwemux config\fR
+.
+.br
+\fBwemux help\fR
+.
+.br
+WEMUX CLIENT COMMANDS:
+.
+.br
+\fBwemux mirror\fR
+.
+.br
+\fBwemux pair\fR
+.
+.br
+\fBwemux logout\fR
+.
+.br
+\fBwemux users\fR
+.
+.br
+\fBwemux help\fR
+.
+.br
+WEMUX SESSION COMMANDS:
+.
+.br
+\fBwemux join\fR
+.
+.br
+\fBwemux reset\fR
+.
+.br
+\fBwemux list\fR
+.
+.br
+.
+.SH "DESCRIPTION"
+wemux enhances tmux to make multi\-user terminal multiplexing both easier and more powerful\. It allows users to host a wemux session and have clients join in either:
+.
+.P
+\fBMirror Mode\fR gives clients (another SSH user on your machine) read\-only access to the session, allowing them to see you work, or
+.
+.P
+\fBPair Mode\fR allows the client and yourself to work in the same terminal (shared cursor) or work independently in another window (separate cursors) in the same tmux session\.
+.
+.P
+It features multi\-session support as well as user listing and notifications when users attach/detach\.
+.
+.SH "HOST COMMANDS"
+.
+.SS "wemux start"
+Start a wemux session, chmod /tmp/wemux\-wemux to 1777 so that other users may connect to it, and attach to it\. If a wemux session already exists, it will attach to it instead\.
+.
+.SS "wemux attach"
+Attach to an existing wemux session\.
+.
+.SS "wemux stop"
+Kill the wemux session and remove the /tmp/wemux\-wemux socket\.
+.
+.SS "wemux kick <username>"
+Kick an SSH user from the server and remove their wemux pair sessions\.
+.
+.SS "wemux config"
+Open \fB/usr/local/etc/wemux\.conf\fR in your $EDITOR\.
+.
+.SS "wemux"
+When \fBwemux\fR is run without any arguments in host mode, it is just like running wemux start\. It will reattach to an existing wemux session if it exists, otherwise it will start a new session\.
+.
+.SH "CLIENT COMMANDS"
+.
+.SS "wemux mirror"
+Attach to session in read\-only mode\.
+.
+.SS "wemux pair"
+Attach to session in pair mode, which allows editing\.
+.
+.SS "wemux logout"
+Remove your pair mode session\.
+.
+.SS "wemux"
+When \fBwemux\fR is run without any arguments in client mode, its behavior attempts to intelligently select mirror or pair:
+.
+.IP "\(bu" 4
+If the client does not have an existing pair session it will attach to the wemux session in mirror mode\.
+.
+.IP "\(bu" 4
+If the client has already started a wemux pair mode session, it will reattach to the session in pair mode\.
+.
+.IP "\(bu" 4
+By setting \fBdefault_client_mode="pair"\fR in \fBwemux\.conf\fR this can be changed to always join in pair mode, even if a pair session doesn\'t already exist\.
+.
+.IP "" 0
+.
+.SS "Other Commands"
+wemux passes commands it doesn\'t understand through to tmux with the correct socket setting\.
+.
+.P
+\fBwemux list\-sessions\fR is equivalent to entering \fBtmux \-S /tmp/wemux\-wemux list\-sessions\fR
+.
+.SH "USER LIST"
+wemux can display a list of connected users, indicating users in mirror mode with [m] at the end of their name\.
+.
+.P
+If you\'d like to see a list of all users currently connected to the wemux session, you have three options:
+.
+.SS "wemux users"
+Enter \fBwemux users\fR in the terminal to display a list of all currently connected wemux users\.
+.
+.IP "" 4
+.
+.nf
+
+$ wemux users
+Users connected to \'wemux\':
+  1\. zolrath
+  2\. csagan[m]
+.
+.fi
+.
+.IP "" 0
+.
+.SS "Status Bar"
+You can add the user list to your status bar by adding #(wemux status_users) where you see fit by editing your \fB~/tmux\.conf\fR file\.
+.
+.IP "" 4
+.
+.nf
+
+set \-g status\-right "#(wemux status_users)"
+.
+.fi
+.
+.IP "" 0
+.
+.SS "Display Message"
+If you\'d rather display users on command via a tmux message, similar to the user attachment/detachment messages, you can do so by editing your \fB~/tmux\.conf\fR file\. Pick whatever key you\'d like to bind the displaying the message to\. Using t as an example:
+.
+.IP "" 4
+.
+.nf
+
+unbind t
+bind t run\-shell \'wemux display_users\'
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Note that the tmux prefix should be pressed before t to activate the command\.
+.
+.P
+User listing can be disabled by setting \fBallow_user_list="false"\fR in \fBwemux\.conf\fR
+.
+.SS "Short\-form Commands"
+All commands have a short form\. s for start, a for attach, p for pair etc\. For a complete list, type \fBwemux help\fR (or \fBwemux h\fR)
+.
+.SH "MULTI\-HOST MODE"
+wemux supports specifying the joining different wemux sessions via \fBwemux join <session>\fR\. This allows multiple hosts on the same machine to host their own independent wemux sessions with their own clients\. By default this option is disabled\.
+.
+.P
+wemux will remember the last session specified to in order to make reconnecting to the same session easy\. \fBwemux help\fR will output the currently specified session along with the wemux command list\.
+.
+.P
+Changing sessions can be enabled by setting \fBallow_session_change="true"\fR in \fB/usr/local/etc/wemux\.conf\fR
+.
+.SS "Joining Different wemux Sessions"
+To change the wemux session run \fBwemux join <session>\fR\. The name will be sanitized to contain no spaces or uppercase letters\.
+.
+.IP "" 4
+.
+.nf
+
+$ wemux join Project X
+Changed wemux session from \'wemux\' to \'project\-x\'
+$ wemux start
+$ wemux
+$ wemux stop
+$ wemux reset
+Changed wemux session from \'project\-x\' to \'wemux\'
+.
+.fi
+.
+.IP "" 0
+.
+.SS "wemux join <sessionname>"
+Join wemux session with specified name\.
+.
+.IP "" 4
+.
+.nf
+
+$ wemux join rails
+Changed wemux session from \'wemux\' to \'rails\'
+.
+.fi
+.
+.IP "" 0
+.
+.SS "wemux join <sessionnumber>"
+Alternatively, enter the session number displayed next to the session name in \fBwemux list\fR\.
+.
+.IP "" 4
+.
+.nf
+
+$ wemux j 1
+Changed wemux session from \'rails\' to \'project\-x\'
+.
+.fi
+.
+.IP "" 0
+.
+.SS "Resetting the Session Name"
+In order to easily return to the default session you can run \fBwemux reset\fR
+.
+.SS "wemux reset"
+Joins the default wemux session: wemux (or value of default_session_name in wemux\.conf)
+.
+.IP "" 4
+.
+.nf
+
+$ wemux reset
+Changed wemux session from \'project\-x\' to \'wemux\'
+.
+.fi
+.
+.IP "" 0
+.
+.SS "Active Session List"
+To list the name of all currently running wemux sessions run \fBwemux list\fR
+.
+.SS "wemux list"
+List all currently active wemux sessions\.
+.
+.IP "" 4
+.
+.nf
+
+$ wemux list
+Currently active wemux sessions:
+  1\. project\-x
+  2\. rails
+  3\. wemux    <\- current session
+.
+.fi
+.
+.IP "" 0
+.
+.P
+\fBwemux join\fR and \fBwemux stop\fR both accept either the name of a session or the number indicated next to the name in \fBwemux list\fR\.
+.
+.P
+Listing sessions can be disabled by setting \fBallow_session_list="false"\fR in \fB/usr/local/etc/wemux\.conf\fR
+.
+.SH "CONFIGURATION"
+There are a number of additional options that be configured in \fB/usr/local/etc/wemux\.conf\fR\. In most cases the only option that must be changed is the \fBhost_list\fR array\. To open your wemux configuration file, you can either open \fB/usr/local/etc/wemux\.conf\fR manually or run \fBwemux config\fR
+.
+.SS "Host Mode"
+To have an account act as host, ensure that you have added their username to the \fB/usr/local/etc/wemux\.conf\fR file\'s \fBhost_list\fR array\.
+.
+.IP "" 4
+.
+.nf
+
+host_list=(zolrath hostusername brocksamson)
+.
+.fi
+.
+.IP "" 0
+.
+.SS "Pair Mode"
+Pair mode can be disabled, only allowing clients to attach to the session in mirror mode by setting \fBallow_pair_mode="false"\fR
+.
+.SS "Default Client Mode"
+When clients enter \'wemux\' with no arguments by default it will first attempt to join an existing pair mode session\. If there is no pair session it will start a mirror mode session\. By setting default_client_mode to "pair", \'wemux\' with no arguments will always join a pair mode session, even if it has to create it\.
+.
+.P
+This can be changed by setting \fBdefault_client_mode="pair"\fR
+.
+.SS "Default Session Name"
+The default wemux session name will be used with \fBwemux reset\fR and when \fBallow_session_change\fR is not enabled in \fBwemux\.conf\fR\.
+.
+.P
+This can be changed by setting \fBdefault_session_name="customname"\fR
+.
+.SS "Changing Sessions"
+The ability to change sessions can be enabled by setting \fBallow_session_change="true"\fR
+.
+.SS "Listing Sessions"
+Listing sessions can be disabled by setting \fBallow_session_list="false"\fR
+.
+.SS "Listing Users"
+Listing users can be disabled by setting \fBallow_user_list="false"\fR in \fBwemux\.conf\fR
+.
+.SS "Kicking SSH Users"
+Kicking SSH users from the server can be disabled by setting \fBallow_kick_user="false"\fR in \fBwemux\.conf\fR
+.
+.SS "Announcements"
+When a user joins a session in either mirror or pair mode, a message is displayed to all currently attached users:
+.
+.IP "" 4
+.
+.nf
+
+csagan has attached in mirror mode\.
+csagan has detached\.
+.
+.fi
+.
+.IP "" 0
+.
+.P
+This can be disabled by setting \fBannounce_attach="false"\fR
+.
+.P
+In addition, when a user switches from one session to another via the \fBwemux join <sessionname>\fR command, their movement is displayed similarly to the attach messages\.
+.
+.P
+If csagan enters \fBwemux join applepie\fR the users on the default session \fBwemux\fR will see:
+.
+.IP "" 4
+.
+.nf
+
+csagan has switched to session: applepie
+.
+.fi
+.
+.IP "" 0
+.
+.P
+If csagan returns to default session with: \fBwemux reset\fR users on \fBwemux\fR will see:
+.
+.IP "" 4
+.
+.nf
+
+csagan has joined this session\.
+.
+.fi
+.
+.IP "" 0
+.
+.P
+This can be disabled by setting \fBannounce_session_change="false"\fR
+.
+.SS "Automatic SSH Client Modes"
+To make an SSHed user start in a wemux mode automatically, add one of the following lines to the users \fB\.bash_profile\fR or \fB\.zshrc\fR
+.
+.P
+\fBOption 1\fR: Automatically log the client into mirror mode upon login, disconnect them from the server when they detach\.
+.
+.P
+\fBwemux mirror; exit\fR
+.
+.br
+.
+.P
+\fBOption 2\fR: Automatically start the client in mirror mode but allow them to detach\.
+.
+.P
+\fBwemux mirror\fR
+.
+.br
+.
+.P
+\fBOption 3\fR: Automatically start the client in pair mode but allow them to detach\.
+.
+.P
+\fBwemux pair\fR
+.
+.br
+.
+.P
+\fBOption 4\fR: Only display the connection commands, don\'t automatically start any modes\.
+.
+.P
+\fBwemux help\fR
+.
+.br
+.
+.P
+Please note that this does not ensure a logged in user will not be able to exit tmux and access their shell\. If the user is not trusted, you must perform any security measures one would normally perform for a remote user\.
+

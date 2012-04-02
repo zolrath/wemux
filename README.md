@@ -15,12 +15,6 @@ access to the session, allowing them to see you work, or
 It features multi-session support as well as user listing
 and notifications when users attach/detach.
 
-**Mirroring** gives clients read-only access to the session, allowing them to
-see you work, or
-
-**Pairing** allows the client and yourself to work in the same terminal (shared
-cursor) or work independently in another window (separate cursors) in the same
-tmux session.
 
 ## How To Install
   The rest of this readme will operate under the assumption you'll place wemux
