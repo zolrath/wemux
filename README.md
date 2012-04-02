@@ -1,11 +1,19 @@
 ![wemux: Multi-User Tmux Sessions Made Easy](http://i.imgur.com/iOjcz.png) 
 ********************************************************************************
 
-wemux allows you to start hosting a multi-user tmux session using the command
-`wemux`.
+wemux enhances tmux to make multi-user terminal multiplexing both easier and
+more powerful. It allows users to host a wemux session and have clients join
+in either:
 
-Clients (generally someone SSHed into another account on the host machine) have
-the option of:
+**Mirror Mode** gives clients (another SSH user on your machine) read-only
+access to the session, allowing them to see you work, or
+
+**Pair Mode** allows the client and yourself to work in the same terminal
+  (shared cursor) or work independently in another window (separate cursors) in
+  the same tmux session.
+
+It features multi-session support as well as user listing
+and notifications when users attach/detach.
 
 **Mirroring** gives clients read-only access to the session, allowing them to
 see you work, or
@@ -28,15 +36,19 @@ tmux session.
 
     ln -s /usr/local/share/wemux/wemux /usr/local/bin/wemux
 
-  **IMPORTANT**: Copy the `wemux.conf.example` file to `/etc/wemux.conf`
+  **IMPORTANT**: Copy the `wemux.conf.example` file to `/usr/local/etc/wemux.conf`
 
-    cp /usr/local/share/wemux/wemux.conf.example /etc/wemux.conf
+    cp /usr/local/share/wemux/wemux.conf.example /usr/local/etc/wemux.conf
 
   Then set a user to be a wemux host by adding their username to the host_list in
-  `/etc/wemux.conf`. Users in the host_list will be able to start new wemux
+  `/usr/local/etc/wemux.conf`. Users in the host_list will be able to start new wemux
   sessions, all other users will be wemux clients and join these sessions.
 
+    vim /usr/local/etc/wemux.conf
     host_list=(zolrath brocksamson)
+
+  To upgrade to a new version of wemux return to the `/usr/local/share/wemux`
+  directory and perform a `git pull`
 
 ## Host Commands
 #### wemux start
@@ -52,7 +64,7 @@ tmux session.
   Use `wemux kick <username>` to kick an SSH user from the server and remove
   their wemux pair sessions.
 #### wemux config
-  Use `wemux config` to open `/etc/wemux.conf` in your $EDITOR.
+  Use `wemux config` to open `/usr/local/etc/wemux.conf` in your $EDITOR.
   Note this only works if you have the environment variable EDITOR configured.
 #### wemux
   When `wemux` is run without any arguments in host mode, it is just like
@@ -110,8 +122,9 @@ tmux session.
 
 ### Display Message
   If you'd rather display users on command via a tmux message, similar to the
-  user attachment/detachment messages, by editing your `~/tmux.conf` file.
-  Pick whatever key you'd like to bind it to. Using t as an example:
+  user attachment/detachment messages, you can do so by editing your
+  `~/tmux.conf` file.  Pick whatever key you'd like to bind the displaying the
+  message to. Using t as an example:
 
     unbind t
     bind t run-shell 'wemux display_users'
@@ -127,6 +140,7 @@ tmux session.
 
 # Multi-Host Capabilities
 ********************************************************************************
+
   wemux supports specifying the joining different wemux sessions via `wemux join
   <session>`. This allows multiple hosts on the same machine to host their own
   independent wemux sessions with their own clients. By default this option is
@@ -137,7 +151,7 @@ tmux session.
   session along with the wemux command list.
 
   Changing sessions can be enabled by setting `allow_session_change="true"` in
-  `/etc/wemux.conf`
+  `/usr/local/etc/wemux.conf`
 
 ### Joining Different wemux Sessions
   To change the wemux session run `wemux join <session>`. The name will be sanitized to contain no spaces or uppercase letters.
@@ -185,18 +199,19 @@ tmux session.
   the number indicated next to the name in `wemux list`.
 
   Listing sessions can be disabled by setting `allow_session_list="false"` in
-  `/etc/wemux.conf`
+  `/usr/local/etc/wemux.conf`
 
 # Configuration
 ********************************************************************************
+
   There are a number of additional options that be configured in
-  `/etc/wemux.conf`.  In most cases the only option that must be changed is the
+  `/usr/local/etc/wemux.conf`.  In most cases the only option that must be changed is the
   `host_list` array. To open your wemux configuration file, you can either open
-  `/etc/wemux.conf` manually or run `wemux config`
+  `/usr/local/etc/wemux.conf` manually or run `wemux config`
 
 ### Host Mode
   To have an account act as host, ensure that you have added their username to the
-  `/etc/wemux.conf` file's `host_list` array.
+  `/usr/local/etc/wemux.conf` file's `host_list` array.
 
     host_list=(zolrath hostusername brocksamson)
 

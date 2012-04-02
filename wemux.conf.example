@@ -1,5 +1,5 @@
 ## wemux Configuration:
-## wemux version 2.2.2
+## wemux version 3.0.0
 ##
 ## Uncomment an option (remove the # in front of it) if you would like to change
 ## the option from its default setting.
@@ -10,7 +10,7 @@
 ## them to create wemux sessions for other users to attach to.
 ## Add the usernames of users who should use wemux in host mode:
 ## example: host_list=(zolrath csagan brocksamson)
-host_list=(root)
+host_list=(change_this)
 
 ####### CLIENT OPTIONS #######
 

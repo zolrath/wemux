@@ -6,8 +6,9 @@
 # or pairing, which will allow them to edit your file (shared cursor) or work
 # in another window (separate cursors) in the hosts tmux session.
 #
-# To set a user as host add their username to the host_list in /etc/wemux.conf
-# Other configuations options are also located in /etc/wemux.conf
+# To set a user as host add their username to the host_list in the configuration
+# file located at /usr/local/etc/wemux.conf
+# Other configuations options are also located in /usr/local/etc/wemux.conf
 #
 # For environments with multiple hosts running their own independent sessions
 # on the same machine wemux can join different sessions with the wemux join
@@ -17,7 +18,7 @@
 # wemux start : Start the wemux session/join an existing wemux session.
 # wemux attach: Join an existing wemux session.
 # wemux stop  : Stop the wemux session, delete the socket.
-# wemux users : List the currently connected wemux users.
+# wemux users : List the currently attached wemux users.
 # wemux kick  : Disconnect an SSH user, remove their wemux session.
 # wemux config: Open the wemux configuration file in your $EDITOR.
 # wemux help  : Display the help screen.
@@ -26,7 +27,7 @@
 # wemux mirror: Attach to Host in read-only mode.
 # wemux pair  : Attach to Host in pair mode, which allows editing.
 # wemux logout: Log out of the wemux pairing session.
-# wemux users : List the currently connected wemux users.
+# wemux users : List the currently attached wemux users.
 # wemux help  : Display the help screen.
 #
 # To enable multi-host commands, set allow_session_change="true" in wemux.conf
@@ -38,11 +39,11 @@
 ###############################################################################
 
 # Current wemux version.
-version="2.2.3"
+version="3.0.0"
 
 # Setup and Configuration Files.
-# Default settings, modify them in the /etc/wemux.conf file:
-host_list=(root)
+# Default settings, modify them in the /usr/local/etc/wemux.conf file:
+host_list=(change_this_in_wemux_conf)
 socket_prefix="/tmp/wemux"
 options="-u"
 allow_pair_mode="true"
@@ -60,8 +61,8 @@ username=`whoami`
 # Set $EDITOR default to vi if not configured on host machine.
 editor=${EDITOR:="vi"}
 
-# Load configuration options from /etc/wemux.conf
-[ -f /etc/wemux.conf ] && . /etc/wemux.conf
+# Load configuration options from /usr/local/etc/wemux.conf
+[ -f /usr/local/etc/wemux.conf ] && . /usr/local/etc/wemux.conf
 
 # Sanitize session name, replace spaces and underscores with dashes.
 # Remove all non alpha-numeric characters, convert to lowercase.
@@ -144,12 +145,6 @@ list_active_sessions() {
   fi
 }
 
-# Tmux status line uses global variables, until something is changed this won't
-# work for filtering users from the user list.
-# set_current_user() {
-#   `$wemux set-environment -t $client_session CURRENT_WEMUX_USER $(whoami)`
-# }
-
 # List users currently attached to wemux session. Username[m] for mirror mode.
 # Only contains names. Formatted for being included as part of status bar.
 status_users() {
@@ -188,9 +183,9 @@ list_users() {
           user_list="$user_list  $num. $user\n"
       done
       if [ -z "$user_list" ]; then
-        echo "No wemux users connected to '$session'."
+        echo "No wemux users attached to '$session'."
       else
-        echo "Users connected to '$session': "
+        echo "Users attached to '$session': "
         # Remove last newline.
         echo -e "${user_list%??}"
       fi
@@ -229,7 +224,7 @@ kill_session_successful() {
 }
 
 # Announce when user attaches/detaches from session.
-# Can be disabled by changing announce_attach to false in /etc/wemux.conf
+# Can be disabled by changing announce_attach to false in /usr/local/etc/wemux.conf
 # The first argument specifies the mode the user is attaching in for the message
 # All additional arguments get wrapped in the attach/detach messages.
 announce_connection() {
@@ -243,7 +238,7 @@ announce_connection() {
 }
 
 # Announces when a user joins/changes their session.
-# Can be disabled by changing announce_session_change to false in /etc/wemux.conf
+# Can be disabled by changing announce_session_change to false in /usr/local/etc/wemux.conf
 # Change session name for session, or display session name if no argument is given.
 change_session() {
   if [ "$allow_session_change" == "true" ]; then
@@ -285,7 +280,7 @@ display_version() {
   echo "To check for a newer version visit: http://www.github.com/zolrath/wemux"
 }
 
-# Host mode, used when user is listed in the host_list array in /etc/wemux.conf
+# Host mode, used when user is listed in the host_list array in /usr/local/etc/wemux.conf
 host_mode() {
   # Start the session if it doesn't exist, otherwise reattach.
   start_session() {
@@ -379,7 +374,7 @@ host_mode() {
       fi
     fi
     if [ "$allow_user_list" == "true" ]; then
-      echo "    [u]       users: List all users currently connected to '$session'"
+      echo "    [u]       users: List all users currently attached to '$session'"
     fi
     if [ "$allow_kick_user" == "true" ]; then
       echo "               kick: Disconnect an SSH user, remove their wemux session."
@@ -410,16 +405,16 @@ host_mode() {
       status_users)  status_users;;
       display_users) display_users;;
       version|v)     display_version;;
-      conf*|c)       $editor /etc/wemux.conf;;
+      conf*|c)       $editor /usr/local/etc/wemux.conf;;
       *)             if ! $wemux $@; then
-                       display_host_commands
+                       echo "To see a list of wemux commands enter 'wemux help'"
                        exit 127
                      fi;;
     esac
   fi
 }
 
-# Client Mode, used when user is NOT listed in the host_list in /etc/wemux.conf
+# Client Mode, used when user is NOT listed in the host_list in /usr/local/etc/wemux.conf
 client_mode() {
   # Mirror mode, allows the user to view wemux session in read only mode.
   mirror_mode() {
@@ -508,7 +503,7 @@ client_mode() {
       fi
     fi
     if [ "$allow_user_list" == "true" ]; then
-      echo "    [u]       users: List all users currently connected to '$session'"
+      echo "    [u]       users: List all users currently attached to '$session'"
     fi
     echo ""
     echo "    [h]        help: Display this screen."
@@ -543,7 +538,7 @@ client_mode() {
       display_users) display_users;;
       version|v)     display_version;;
       *)             if ! $wemux $@; then
-                       display_client_commands
+                       echo "To see a list of wemux commands enter 'wemux help'"
                        exit 127
                      fi;;
     esac
@@ -566,8 +561,8 @@ allowed_nested_command() {
   done
   return 1
 }
-
 # Create $wemux variable.
+
 build_wemux_prefix
 
 # Don't allow wemux to be run directly within a wemux session.
