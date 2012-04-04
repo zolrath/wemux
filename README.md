@@ -20,19 +20,19 @@ and notifications when users attach/detach.
 ## How To Install
 ### Homebrew (on OS X)
   If you have [Homebrew](http://mxcl.github.com/homebrew/) installed you can
-  install wemux with a simple:
+  install wemux with a fairly simple:
 
     brew install https://github.com/downloads/zolrath/wemux/wemux.rb
 
-  The user you installed wemux with should automatically be a wemux host. To
-  change the host or add more, edit `/usr/local/etc/wemux.conf` and add the
+  The user that installed wemux will automatically be added to the wemux host list.
+  To change the host or add more hosts, edit `/usr/local/etc/wemux.conf` and add the
   username to the host_list array.
 
   Users in the host_list will be able to start new wemux servers, all other
   users will be wemux clients and join these servers.
 
     $ vim /usr/local/etc/wemux.conf
-    OR
+         OR
     $ wemux conf
 
     host_list=(zolrath brocksamson)
@@ -46,7 +46,7 @@ and notifications when users attach/detach.
 
     git clone git://github.com/zolrath/wemux.git /usr/local/share/wemux
 
-  Symlink the `wemux` file into your $PATH such as `/usr/local/bin/`,
+  Symlink the `wemux` file into your $PATH via `/usr/local/bin/`,
   being sure to use the full path.
 
     ln -s /usr/local/share/wemux/wemux /usr/local/bin/wemux
@@ -90,12 +90,13 @@ and notifications when users attach/detach.
 #### wemux mirror
   Use `wemux mirror` to attach to server in read-only mode.
 #### wemux pair
-  Use `wemux pair` to attach to server in pair mode, which allows editing.
+  Use `wemux pair` to attach to server in pair mode, allowing the client to 
+  control the terminal as well.
 #### wemux rogue
-  Use `wemux rogue` to attach to server in rogue mode, which allows editing and
-  switching to windows independently from the host.
+  Use `wemux rogue` to attach to server in rogue mode, which allows both editing
+  with the host and switching to windows independently from the host.
 #### wemux logout
-  Use `wemux logout` to remove your pair mode session.
+  Use `wemux logout` to remove your rogue mode session.
 #### wemux
   When `wemux` is run without any arguments in client mode, its behavior
   attempts to intelligently select mirror, pair, or rogue:
@@ -104,6 +105,7 @@ and notifications when users attach/detach.
   wemux server in pair mode.
   * If the client has already started a wemux rogue session, it will
   reattach to the server in rogue mode.
+  * If both rogue and pair mode are disabled, it will attach in mirror mode.
   * By setting `default_client_mode="rogue"` in `wemux.conf` this can be changed
   to always join in rogue mode, even if a rogue session doesn't already exist.
 
@@ -311,8 +313,13 @@ and notifications when users attach/detach.
   detach.
 
     wemux pair
+    
+  **Option 4**: Automatically start the client in rogue mode but allow them to
+  detach.
 
-  **Option 4**: Only display the connection commands, don't automatically start
+    wemux rogue
+
+  **Option 5**: Only display the connection commands, don't automatically start
   any modes.
 
     wemux help
