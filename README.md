@@ -2,7 +2,7 @@
 ********************************************************************************
 
 wemux enhances tmux to make multi-user terminal multiplexing both easier and
-more powerful. It allows users to host a wemux session and have clients join
+more powerful. It allows users to host a wemux server and have clients join
 in either:
 
 **Mirror Mode** gives clients (another SSH user on your machine) read-only
@@ -12,7 +12,7 @@ access to the session, allowing them to see you work, or
   (shared cursor) or work independently in another window (separate cursors) in
   the same tmux session.
 
-It features multi-session support as well as user listing
+It features multi-server support as well as user listing
 and notifications when users attach/detach.
 
 
@@ -36,7 +36,7 @@ and notifications when users attach/detach.
 
   Then set a user to be a wemux host by adding their username to the host_list in
   `/usr/local/etc/wemux.conf`. Users in the host_list will be able to start new wemux
-  sessions, all other users will be wemux clients and join these sessions.
+  servers, all other users will be wemux clients and join these servers.
 
     vim /usr/local/etc/wemux.conf
     host_list=(zolrath brocksamson)
@@ -46,13 +46,13 @@ and notifications when users attach/detach.
 
 ## Host Commands
 #### wemux start
-  Use `wemux start` to start a wemux session, chmod /tmp/wemux-wemux to 1777 so
-  that other users may connect to it, and attach to it.  If a wemux session
+  Use `wemux start` to start a wemux server, chmod /tmp/wemux-wemux to 1777 so
+  that other users may connect to it, and attach to it.  If a wemux server
   already exists, it will attach to it instead.
 #### wemux attach
-  Use `wemux attach` to attach to an existing wemux session.
+  Use `wemux attach` to attach to an existing wemux server.
 #### wemux stop
-  Use `wemux stop` to kill the wemux session and remove the /tmp/wemux-wemux
+  Use `wemux stop` to kill the wemux server and remove the /tmp/wemux-wemux
   socket.
 #### wemux kick *username*
   Use `wemux kick <username>` to kick an SSH user from the server and remove
@@ -62,16 +62,14 @@ and notifications when users attach/detach.
   Note this only works if you have the environment variable EDITOR configured.
 #### wemux
   When `wemux` is run without any arguments in host mode, it is just like
-  running wemux start.  It will reattach to an existing wemux session if it
-  exists, otherwise it will start a new session.
+  running wemux start.  It will reattach to an existing wemux server if it
+  exists, otherwise it will start a new server.
 
 ## Client Commands
-  All client commands notify the wemux session host that the user has
-  attached/detached, and in what mode.
 #### wemux mirror
-  Use `wemux mirror` to attach to session in read-only mode.
+  Use `wemux mirror` to attach to server in read-only mode.
 #### wemux pair
-  Use `wemux pair` to attach to session in pair mode, which allows editing.
+  Use `wemux pair` to attach to server in pair mode, which allows editing.
 #### wemux logout
   Use `wemux logout` to remove your pair mode session.
 #### wemux
@@ -79,9 +77,9 @@ and notifications when users attach/detach.
   attempts to intelligently select mirror or pair:
 
   * If the client does not have an existing pair session it will attach to the
-  wemux session in mirror mode.
+  wemux server in mirror mode.
   * If the client has already started a wemux pair mode session, it will
-  reattach to the session in pair mode.
+  reattach to the server in pair mode.
   * By setting `default_client_mode="pair"` in `wemux.conf` this can be changed
   to always join in pair mode, even if a pair session doesn't already exist.
 
@@ -97,7 +95,7 @@ and notifications when users attach/detach.
   with [m] at the end of their name.
 
   If you'd like to see a list of all users currently connected to the wemux
-  session, you have three options:
+  server, you have three options:
 
 ### wemux users
   Enter `wemux users` in the terminal to display a list of all currently
@@ -135,64 +133,63 @@ and notifications when users attach/detach.
 # Multi-Host Capabilities
 ********************************************************************************
 
-  wemux supports specifying the joining different wemux sessions via `wemux join
-  <session>`. This allows multiple hosts on the same machine to host their own
-  independent wemux sessions with their own clients. By default this option is
+  wemux supports specifying the joining different wemux servers via `wemux join
+  <server>`. This allows multiple hosts on the same machine to host their own
+  independent wemux servers with their own clients. By default this option is
   disabled.
 
-  wemux will remember the last session specified to in order to make reconnecting
-  to the same session easy. `wemux help` will output the currently specified
-  session along with the wemux command list.
+  wemux will remember the last server specified to in order to make reconnecting
+  to the same server easy. `wemux help` will output the currently specified
+  server along with the wemux command list.
 
-  Changing sessions can be enabled by setting `allow_session_change="true"` in
+  Changing servers can be enabled by setting `allow_server_change="true"` in
   `/usr/local/etc/wemux.conf`
 
-### Joining Different wemux Sessions
-  To change the wemux session run `wemux join <session>`. The name will be sanitized to contain no spaces or uppercase letters.
+### Joining Different wemux Servers
+  To change the wemux server run `wemux join <server>`. The name will be sanitized to contain no spaces or uppercase letters.
 
     $ wemux join Project X
-    Changed wemux session from 'wemux' to 'project-x'
-    $ wemux start
+    Changed wemux server from 'wemux' to 'project-x'
     $ wemux
     $ wemux stop
     $ wemux reset
-    Changed wemux session from 'project-x' to 'wemux'
+    Changed wemux server from 'project-x' to 'wemux'
 
-#### wemux join *sessionname*
-  Join wemux session with specified name.
+#### wemux join *servername*
+  Join wemux server with specified name.
 
     $ wemux join rails
-    Changed wemux session from 'wemux' to 'rails'
+    Changed wemux server from 'wemux' to 'rails'
 
-#### wemux join *sessionnumber*
-  Alternatively, enter the session number displayed next to the session name in `wemux list`.
+#### wemux join *servernumber*
+  Alternatively, enter the server number displayed next to the server name in `wemux list`.
 
     $ wemux j 1
-    Changed wemux session from 'rails' to 'project-x'
+    Changed wemux server from 'rails' to 'project-x'
 
-### Resetting the Session Name
-  In order to easily return to the default session you can run `wemux reset`
+### Resetting the Server Name
+  In order to easily return to the default server you can run `wemux reset`
 #### wemux reset
-  Joins the default wemux session: wemux (or value of default_session_name in wemux.conf)
+  Joins the default wemux server: wemux (or value of default_server_name in wemux.conf)
 
     $ wemux reset
-    Changed wemux session from 'project-x' to 'wemux'
+    Changed wemux server from 'project-x' to 'wemux'
 
-### Active Session List
-  To list the name of all currently running wemux sessions run `wemux list`
+### Active Server List
+  To list the name of all currently running wemux servers run `wemux list`
 #### wemux list
-  List all currently active wemux sessions.
+  List all currently active wemux servers.
 
     $ wemux list
-    Currently active wemux sessions:
+    Currently active wemux servers:
       1. project-x
       2. rails
-      3. wemux    <- current session
+      3. wemux    <- current server
 
-  `wemux join` and `wemux stop` both accept either the name of a session or
+  `wemux join` and `wemux stop` both accept either the name of a server or
   the number indicated next to the name in `wemux list`.
 
-  Listing sessions can be disabled by setting `allow_session_list="false"` in
+  Listing servers can be disabled by setting `allow_server_list="false"` in
   `/usr/local/etc/wemux.conf`
 
 # Configuration
@@ -210,30 +207,30 @@ and notifications when users attach/detach.
     host_list=(zolrath hostusername brocksamson)
 
 ### Pair Mode
-  Pair mode can be disabled, only allowing clients to attach to the session in
+  Pair mode can be disabled, only allowing clients to attach to the server in
   mirror mode by setting `allow_pair_mode="false"`
 
 ### Default Client Mode
  When clients enter 'wemux' with no arguments by default it will first attempt to
  join an existing pair mode session. If there is no pair session it will start
- a mirror mode session.
+ in mirror mode.
  By setting default_client_mode to "pair", 'wemux' with no arguments will always
  join a pair mode session, even if it has to create it.
 
   This can be changed by setting `default_client_mode="pair"`
 
-### Default Session Name
-  The default wemux session name will be used with `wemux reset` and when
-  `allow_session_change` is not enabled in `wemux.conf`.
+### Default Server Name
+  The default wemux server name will be used with `wemux reset` and when
+  `allow_server_name` is not enabled in `wemux.conf`.
 
-  This can be changed by setting `default_session_name="customname"`
+  This can be changed by setting `default_server_name="customname"`
 
-### Changing Sessions
-  The ability to change sessions can be enabled by setting
-  `allow_session_change="true"`
+### Changing Servers
+  The ability to change servers can be enabled by setting
+  `allow_server_change="true"`
 
-### Listing Sessions
-  Listing sessions can be disabled by setting `allow_session_list="false"`
+### Listing Servers
+  Listing servers can be disabled by setting `allow_server_list="false"`
 
 ### Listing Users
   Listing users can be disabled by setting `allow_user_list="false"` in
@@ -244,7 +241,7 @@ and notifications when users attach/detach.
   `allow_kick_user="false"` in `wemux.conf`
 
 ### Announcements
-  When a user joins a session in either mirror or pair mode, a message is
+  When a user joins a server in either mirror or pair mode, a message is
   displayed to all currently attached users:
 
     csagan has attached in mirror mode.
@@ -252,21 +249,21 @@ and notifications when users attach/detach.
 
  This can be disabled by setting `announce_attach="false"`
 
- In addition, when a user switches from one session to another via the `wemux
- join <sessionname>` command, their movement is displayed similarly to the
+ In addition, when a user switches from one server to another via the `wemux
+ join <servername>` command, their movement is displayed similarly to the
  attach messages.
 
-  If csagan enters `wemux join applepie` the users on the default session
+  If csagan enters `wemux join applepie` the users on the default server
   `wemux` will see:
 
-    csagan has switched to session: applepie
+    csagan has switched to server: applepie
 
-  If csagan returns to default session with: `wemux reset` users on `wemux`
+  If csagan returns to default server with: `wemux reset` users on `wemux`
   will see:
 
-    csagan has joined this session.
+    csagan has joined this server.
 
-  This can be disabled by setting `announce_session_change="false"`
+  This can be disabled by setting `announce_server_change="false"`
 
 ### Automatic SSH Client Modes
   To make an SSHed user start in a wemux mode automatically, add one of the
