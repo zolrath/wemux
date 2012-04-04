@@ -2,8 +2,10 @@
 # wemux by Matt Furden @zolrath
 #
 # wemux allows you to start a shared tmux session using the command 'wemux'.
-# Clients have the option of mirroring, which will give them read-only access,
-# or pairing, which will allow them to edit your file (shared cursor) or work
+# Clients have the option of:
+# Mirroring, which will give them read-only access,
+# Pairing, which will allow them to control the hosts cursor.
+# Rogue mode, which  allows them to work in the same window (shared cursor) or
 # in another window (separate cursors) in the hosts tmux session.
 #
 # To set a user as host add their username to the host_list in the configuration
@@ -26,7 +28,9 @@
 # WEMUX CLIENT COMMANDS:
 # wemux mirror: Attach to Host in read-only mode.
 # wemux pair  : Attach to Host in pair mode, which allows editing.
-# wemux logout: Log out of the wemux pairing session.
+# wemux rogue : Attach to Host in rogue mode, which allows editing and switching
+#               to windows independently from the host.
+# wemux logout: Log out of the wemux rogueing session.
 # wemux users : List the currently attached wemux users.
 # wemux help  : Display the help screen.
 #
@@ -39,7 +43,7 @@
 ###############################################################################
 
 # Current wemux version.
-version="3.0.0"
+version="3.1.0"
 
 # Setup and Configuration Files.
 # Default settings, modify them in the /usr/local/etc/wemux.conf file:
@@ -47,6 +51,7 @@ host_list=(change_this_in_wemux_conf)
 socket_prefix="/tmp/wemux"
 options="-u"
 allow_pair_mode="true"
+allow_rogue_mode="true"
 default_client_mode="mirror"
 allow_kick_user="true"
 allow_server_change="false"
@@ -211,8 +216,8 @@ session_exists() {
   [ "$does_exist" == 0 ] && return 0 || return 1;
 }
 
-# Returns true if pair session with current host already exists.
-has_pair_session() {
+# Returns true if rogue session with current host already exists.
+has_rogue_session() {
   redirect=`$wemux has-session -t $client_session 2>&1`; does_exist=$?
   [ "$does_exist" == 0 ] && return 0 || return 1;
 }
@@ -368,7 +373,7 @@ host_mode() {
     echo ""
     if [ "$allow_server_change" == "true" ]; then
       echo "    [j] join [name]: Join the specified wemux server."
-      echo "    [r]       reset: Join default wemux server: $default_server_name"
+      echo "    [d]       reset: Join default wemux server: $default_server_name"
       if [ "$allow_server_list" == "true" ]; then
         echo "    [l]        list: List all currently active wemux servers."
       fi
@@ -398,7 +403,7 @@ host_mode() {
       help|h)         display_host_commands;;
       join|j)         shift; change_server $@;;
       name|n)         shift; change_server $@;;
-      reset|r)        change_server "$default_server_name";;
+      reset|d)        change_server "$default_server_name";;
       list|l)         list_active_servers;;
       users|u)        list_users;;
       kick)           kick_user $2;;
@@ -428,53 +433,69 @@ client_mode() {
   # Pair mode, allows user to interact with wemux server.
   pair_mode() {
     if [ "$allow_pair_mode" == "true" ]; then
-      if has_pair_session; then
+      if session_exists; then
+        $wemux attach -t $server
+      else
+        echo "No wemux server to pair with on '$server'."
+      fi
+    else
+      echo "Pair mode is disabled."
+      return 126
+    fi
+  }
+
+  # Rogue mode, allows user to interact with wemux server and operate
+  # independently in other windows.
+  # Will connect to existing rogue session or create one if necessary.
+  rogue_mode() {
+    if [ "$allow_rogue_mode" == "true" ]; then
+      if has_rogue_session; then
         $wemux attach -t $client_session
       elif session_exists; then
         $wemux new-session -d -t $server -s $client_session
         $wemux new-window -n $username
         $wemux attach -t $client_session
       else
-        echo "No wemux server to pair with on '$server'"
+        echo "No wemux server to go 'rogue' with on '$server'."
       fi
     else
-      echo "Pair mode is disabled."
+      echo "Rogue mode is disabled."
       return 126
     fi
   }
 
-  # Log user out of pair mode, removing their session..
-  logout_pair() {
-    if [ "$allow_pair_mode" == "true" ]; then
-      if has_pair_session; then
+  # Log user out of rogue mode, removing their session..
+  logout_rogue() {
+    if [ "$allow_rogue_mode" == "true" ]; then
+      if has_rogue_session; then
         [ "$announce_attach" == "true" ] && $wemux display-message \
-          "$username has logged out of pair mode."
+          "$username has logged out of rogue mode."
         $wemux kill-session -t $client_session
-        echo "Logged out of pair mode on '$server'."
+        echo "Logged out of rogue mode on '$server'."
       else
         echo "No wemux server to log out of on '$server'."
       fi
     else
-      echo "Pair mode is disabled."
+      echo "Rogue mode is disabled."
       return 126
     fi
   }
 
-  # Reattach based upon presence of existing pair mode session.
-  # If pair mode session exists, reattach to it.
-  # If no pair mode session exists, mirror the host.
   smart_reattach() {
+    # If default_client_mode has been set to "rogue" in wemux.conf:
+    if [ "$default_client_mode" == "rogue" ] && [ "$allow_rogue_mode" == "true" ]; then
+      announce_connection "rogue" rogue_mode
     # If default_client_mode has been set to "pair" in wemux.conf:
-    if [ "$default_client_mode" == "pair" ] && [ "$allow_pair_mode" == "true" ]; then
-        announce_connection "pair" pair_mode
+    elif [ "$default_client_mode" == "pair" ] && [ "$allow_pair_mode" == "true" ]; then
+      announce_connection "pair" pair_mode
+    elif has_rogue_session && [ "$allow_rogue_mode" == "true" ]; then
+      announce_connection "rogue" rogue_mode
+    elif [ "$allow_pair" == "true" ]; then
+      announce_connection "pair" pair_mode
+    elif session_exists; then
+      announce_connection "mirror" $wemux attach -t $server -r
     else
-      if has_pair_session && [ "$allow_pair_mode" == "true" ]; then
-        announce_connection "pair" $wemux attach -t $client_session
-      elif session_exists; then
-        announce_connection "mirror" $wemux attach -t $server -r
-      else
-        echo "No wemux server to attach to on '$server'"
-      fi
+      echo "No wemux server to attach to on '$server'"
     fi
   }
 
@@ -491,7 +512,11 @@ client_mode() {
     echo "    [m]      mirror: Attach to '$server' in read-only mode."
     if [ "$allow_pair_mode" == "true" ]; then
       echo "    [p]        pair: Attach to '$server' in pair mode, which allows editing."
-      echo "    [o]      logout: Log out of the current wemux pairing session."
+    fi
+    if [ "$allow_rogue_mode" == "true" ]; then
+      echo "    [r]       rogue: Attach to '$server' in rogue mode, allowing you to pair"
+      echo "                     and also work in other windows independent of the host."
+      echo "    [o]      logout: Log out of the current wemux rogue session."
     fi
     echo ""
     if [ "$allow_server_change" == "true" ]; then
@@ -506,11 +531,18 @@ client_mode() {
     fi
     echo ""
     echo "    [h]        help: Display this screen."
-    if [ "$default_client_mode" == "pair" ] && [ "$allow_pair_mode" == "true" ]; then
-      echo "            no args: Attach to '$server' in pair mode, which allows editing."
-    elif [ "$allow_pair_mode" == "true" ]; then
-      echo "            no args: Attach to pair session on '$server' if it already exists,"
+    if [ "$default_client_mode" == "rogue" ] && [ "$allow_rogue_mode" == "true" ]; then
+      echo "            no args: Attach to '$server' in rogue mode."
+    elif [ "$default_client_mode" == "pair" ] && [ "$allow_pair_mode" == "true" ]; then
+      echo "            no args: Attach to '$server' in pair mode."
+    elif [ "$allow_rogue_mode" == "true" ] &&  [ "$allow_pair_mode" == "true" ]; then
+      echo "            no args: Attach to rogue session on '$server' if it already exists,"
+      echo "                     otherwise, attach in pair mode."
+    elif [ "$allow_rogue_mode" == "true" ] &&  [ "$allow_pair_mode" == "false" ]; then
+      echo "            no args: Attach to rogue session on '$server' if it already exists,"
       echo "                     otherwise, attach in mirror mode."
+    elif [ "$allow_pair_mode" == "true" ]; then
+      echo "            no args: Attach to '$server' in pair mode."
     else
       echo "            no args: Attach to '$server' in mirror mode."
     fi
@@ -524,9 +556,10 @@ client_mode() {
     case "$1" in
       mirror|m)      announce_connection "mirror" mirror_mode;;
       pair|p)        announce_connection "pair" pair_mode;;
-      edit|e)        announce_connection "pair" pair_mode;;
-      logout|o)      logout_pair;;
-      stop|s)        logout_pair;;
+      rogue|r)       announce_connection "rogue" rogue_mode;;
+      edit|e)        announce_connection "rogue" rogue_mode;;
+      logout|o)      logout_rogue;;
+      stop|s)        logout_rogue;;
       help|h)        display_client_commands;;
       join|j)        shift; change_server $@;;
       name|n)        shift; change_server $@;;

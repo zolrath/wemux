@@ -19,6 +19,11 @@ host_list=(change_this)
 ## Defaults to "true"
 # allow_pair_mode="false"
 
+## Allow users to attach to the wemux sever in rogue mode.
+## When set to false, clients will only be able to attach in pair or mirror mode.
+## Defaults to "true"
+# allow_rogue_mode="false"
+
 ## When clients enter 'wemux' with no arguments by default it will attempt to
 ## join an existing pair mode session, if there is no pair session it will start
 ## a mirror mode session.

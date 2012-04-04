@@ -56,7 +56,7 @@ and notifications when users attach/detach.
   socket.
 #### wemux kick *username*
   Use `wemux kick <username>` to kick an SSH user from the server and remove
-  their wemux pair sessions.
+  their wemux rogue sessions.
 #### wemux config
   Use `wemux config` to open `/usr/local/etc/wemux.conf` in your $EDITOR.
   Note this only works if you have the environment variable EDITOR configured.
@@ -70,18 +70,21 @@ and notifications when users attach/detach.
   Use `wemux mirror` to attach to server in read-only mode.
 #### wemux pair
   Use `wemux pair` to attach to server in pair mode, which allows editing.
+#### wemux rogue
+  Use `wemux rogue` to attach to server in rogue mode, which allows editing and
+  switching to windows independently from the host.
 #### wemux logout
   Use `wemux logout` to remove your pair mode session.
 #### wemux
   When `wemux` is run without any arguments in client mode, its behavior
-  attempts to intelligently select mirror or pair:
+  attempts to intelligently select mirror, pair, or rogue:
 
-  * If the client does not have an existing pair session it will attach to the
-  wemux server in mirror mode.
-  * If the client has already started a wemux pair mode session, it will
-  reattach to the server in pair mode.
-  * By setting `default_client_mode="pair"` in `wemux.conf` this can be changed
-  to always join in pair mode, even if a pair session doesn't already exist.
+  * If the client does not have an existing rogue session it will attach to the
+  wemux server in pair mode.
+  * If the client has already started a wemux rogue session, it will
+  reattach to the server in rogue mode.
+  * By setting `default_client_mode="rogue"` in `wemux.conf` this can be changed
+  to always join in rogue mode, even if a rogue session doesn't already exist.
 
 #### Other Commands
   wemux passes commands it doesn't understand through to tmux with the correct
@@ -210,14 +213,18 @@ and notifications when users attach/detach.
   Pair mode can be disabled, only allowing clients to attach to the server in
   mirror mode by setting `allow_pair_mode="false"`
 
+### Rogue Mode
+  Rogue mode can be disabled, only allowing clients to attach to the server in
+  mirror mode by setting `allow_rogue_mode="false"`
+
 ### Default Client Mode
  When clients enter 'wemux' with no arguments by default it will first attempt to
- join an existing pair mode session. If there is no pair session it will start
- in mirror mode.
- By setting default_client_mode to "pair", 'wemux' with no arguments will always
- join a pair mode session, even if it has to create it.
+ join an existing rogue mode session. If there is no rogue session it will start
+ in pair mode.
+ By setting default_client_mode to "rogue", 'wemux' with no arguments will always
+ join a rogue mode session, even if it has to create it.
 
-  This can be changed by setting `default_client_mode="pair"`
+  This can be changed by setting `default_client_mode="rogue"`
 
 ### Default Server Name
   The default wemux server name will be used with `wemux reset` and when
@@ -241,7 +248,7 @@ and notifications when users attach/detach.
   `allow_kick_user="false"` in `wemux.conf`
 
 ### Announcements
-  When a user joins a server in either mirror or pair mode, a message is
+  When a user joins a server in either mirror, pair, or rogue mode, a message is
   displayed to all currently attached users:
 
     csagan has attached in mirror mode.
