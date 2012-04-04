@@ -9,14 +9,35 @@ in either:
 access to the session, allowing them to see you work, or
 
 **Pair Mode** allows the client and yourself to work in the same terminal
-  (shared cursor) or work independently in another window (separate cursors) in
-  the same tmux session.
+(shared cursor)
+
+**Rogue Mode** allows the client to pair or work independently in another
+window (separate cursors) in the same tmux session.
 
 It features multi-server support as well as user listing
 and notifications when users attach/detach.
 
-
 ## How To Install
+### Homebrew (on OS X)
+  If you have [Homebrew](http://mxcl.github.com/homebrew/) installed you can
+  install wemux with a simple:
+
+    brew install https://github.com/downloads/zolrath/wemux/wemux.rb
+
+  The user you installed wemux with should automatically be a wemux host. To
+  change the host or add more, edit `/usr/local/etc/wemux.conf` and add the
+  username to the host_list array.
+
+  Users in the host_list will be able to start new wemux servers, all other
+  users will be wemux clients and join these servers.
+
+    $ vim /usr/local/etc/wemux.conf
+    OR
+    $ wemux conf
+
+    host_list=(zolrath brocksamson)
+
+### Manual Installation
   The rest of this readme will operate under the assumption you'll place wemux
   in `wemux/` in your `/usr/local/share` directory. To make wemux available for
   all users, perform the following steps, using sudo as required:
