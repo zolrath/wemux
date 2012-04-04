@@ -207,6 +207,54 @@ display_users() {
     redirect=`$wemux display-message "$(wemux users)" 2>&1`
 }
 
+# Returns the host's tty and server name.
+get_host_session() {
+  redirect=`wemux server-info 2>&1`; server_running=$?
+  if [ "$server_running" == 0 ]; then
+    while read line; do
+      read tty current_session <<<$(echo $line)
+      # Get user associated with tty
+      name=`stat -f%Su $tty 2>/dev/null` || name=`stat -c%U $tty 2>/dev/null`
+      if [[ $name == $username ]]; then
+        host=$tty
+        host_session=$current_session
+      fi
+    done < <(wemux list-clients | cut -f1,2 -d ' ' | sed s/://)
+  echo "$host $host_session"
+  fi
+}
+
+# Set all users to mirror mode on the hosts current session
+mirror_all_users() {
+  get_host_session > read host host_session
+  while read tty; do
+    if ! [[ $tty == $host ]]; then
+      redirect=`$wemux switch-client -c $tty -t $host_session -r 2>&1`
+    fi
+  done < <(wemux list-clients | cut -f1 -d ' ' | sed s/://)
+}
+
+# Make all users join the hosts session.
+summon_all_users() {
+  get_host_session > read host host_session
+  while read tty; do
+    if ! [[ $tty == $host ]]; then
+      $wemux switch-client -c $tty -t $host_session
+    fi
+  done < <(wemux list-clients | cut -f1 -d ' ' | sed s/://)
+}
+
+# Make all mirrored users join the hosts session.
+summon_mirrored() {
+  get_host_session > read host host_session
+  while read line; do
+    read tty mode <<<$(echo $line)
+    if ! [[ $tty == $host ]] && [[ $mode == "(ro)" ]]; then
+      $wemux switch-client -c $tty -t $host_session
+    fi
+  done < <(wemux list-clients | cut -f1,6 -d ' '| sed s/://)
+}
+
 # The ugly group of redirects below solve the issue where tmux/epoll causes tmux
 # to hang when stderr is redirected to /dev/null in a backwards compatible way.
 
@@ -406,6 +454,9 @@ host_mode() {
       reset|d)        change_server "$default_server_name";;
       list|l)         list_active_servers;;
       users|u)        list_users;;
+      summon)         summon_mirrored;;
+      summon_all)     summon_all_users;;
+      mirror_all)     mirror_all_users;;
       kick)           kick_user $2;;
       status_users)   status_users;;
       display_users)  display_users;;
@@ -586,8 +637,8 @@ user_is_a_host() {
 }
 
 allowed_nested_command() {
-  commands=(users u list l display_users status_users list-clients
-  kill-sesssion kick version v)
+  commands=(mirror_all summon summon_all users u list l display_users
+  status_users list-clients kill-sesssion kick version v)
   for command in "${commands[@]}"; do
     [[ "$command" == "$1" ]] && return 0
   done
@@ -605,6 +656,19 @@ if [[ "$TMUX" != *$socket* ]] || allowed_nested_command "$1" ; then
   else
     client_mode "$@"
   fi
+elif [[ $@ == "help" ]] || [[ $@ == "h" ]]; then
+  echo "Most wemux commands can only be run while detached from tmux."
+  echo "The commands that are available while attached are:"
+  echo ""
+  echo "HOST ONLY COMMANDS:"
+  echo "    [s]      summon: Summon all mirrored users to your current session."
+  echo "          summonall: Summon all users to your current session."
+  echo "        setmirrored: Set all users to mirror mode at your current session."
+  echo "        kick [user]: Kick specified user from the server."
+  echo ""
+  echo "GENERAL COMMANDS:"
+  echo "    [u]  users: List all attached users"
+  echo "    [l]   list: List all wemux servers"
 else
   echo "You're already attached to the wemux server on '$server'"
   echo "wemux does not allow nesting wemux servers directly."
