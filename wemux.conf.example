@@ -7,7 +7,7 @@
 ####### HOST OPTIONS #######
 
 ## All usernames in host_list will use wemux in host mode, allowing
-## them to create wemux severs for other users to attach to.
+## them to create wemux servers for other users to attach to.
 ## Add the usernames of users who should use wemux in host mode:
 ## example: host_list=(zolrath csagan brocksamson)
 host_list=(change_this)
