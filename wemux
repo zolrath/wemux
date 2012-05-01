@@ -398,11 +398,11 @@ host_mode() {
     case "$1" in
       start|s)        announce_connection "host" start_server;;
       attach|a)       announce_connection "host" reattach;;
-      stop|st)        shift; stop_server $@;;
-      kill|k)         shift; stop_server $@;;
+      stop|st)        shift; stop_server "$@";;
+      kill|k)         shift; stop_server "$@";;
       help|h)         display_host_commands;;
-      join|j)         shift; change_server $@;;
-      name|n)         shift; change_server $@;;
+      join|j)         shift; change_server "$@";;
+      name|n)         shift; change_server "$@";;
       reset|d)        change_server "$default_server_name";;
       list|l)         list_active_servers;;
       users|u)        list_users;;
@@ -411,7 +411,7 @@ host_mode() {
       display_users)  display_users;;
       version|v)      display_version;;
       conf*|c)        $editor /usr/local/etc/wemux.conf;;
-      *)              if ! $wemux $@; then
+      *)              if ! $wemux "$@"; then
                         echo "To see a list of wemux commands enter 'wemux help'"
                         exit 127
                       fi;;
@@ -561,15 +561,15 @@ client_mode() {
       logout|o)      logout_rogue;;
       stop|s)        logout_rogue;;
       help|h)        display_client_commands;;
-      join|j)        shift; change_server $@;;
-      name|n)        shift; change_server $@;;
+      join|j)        shift; change_server "$@";;
+      name|n)        shift; change_server "$@";;
       reset|d)       change_server "$default_server_name";;
       list|l)        list_active_servers;;
       users|u)       list_users;;
       status_users)  status_users;;
       display_users) display_users;;
       version|v)     display_version;;
-      *)             if ! $wemux $@; then
+      *)             if ! $wemux "$@"; then
                        echo "To see a list of wemux commands enter 'wemux help'"
                        exit 127
                      fi;;
