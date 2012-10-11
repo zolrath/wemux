@@ -68,6 +68,9 @@ editor=${EDITOR:="vi"}
 
 # Load configuration options from /usr/local/etc/wemux.conf
 [ -f /usr/local/etc/wemux.conf ] && . /usr/local/etc/wemux.conf
+# Also load configuration options from a wemux.conf in the same directory as the wemux script itself (useful for non-root installations)
+wemux_dir=`dirname \`readlink $0 || echo $0\``
+[ -f $wemux_dir/wemux.conf ] && . $wemux_dir/wemux.conf
 
 # Sanitize server name, replace spaces and underscores with dashes.
 # Remove all non alpha-numeric characters, convert to lowercase.
