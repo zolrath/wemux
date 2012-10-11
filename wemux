@@ -94,7 +94,7 @@ load_server_name() {
       fi
     else
       # If ~/.wemux_last_server doesn't exist set to default_server_name
-      server="$default_server_name"
+      server="$default_server_name-`whoami`"
     fi
   else
     # If allow_server_change is disabled, set to default_server_name
