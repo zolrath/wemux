@@ -599,11 +599,16 @@ build_wemux_prefix
 
 # Don't allow wemux to be run directly within a wemux server.
 if [[ "$TMUX" != *$socket* ]] || allowed_nested_command "$1" ; then
-  # If user is in host list, use host mode. If not, use client mode.
-  if user_is_a_host; then
-    host_mode "$@"
+  # Allow manual override to operate in client mode.
+  if [ "$1" = "client" ]; then
+    shift; client_mode "$@"
   else
-    client_mode "$@"
+    # If user is in host list, use host mode. If not, use client mode.
+    if user_is_a_host; then
+      host_mode "$@"
+    else
+      client_mode "$@"
+    fi
   fi
 else
   echo "You're already attached to the wemux server on '$server'"
