@@ -311,9 +311,9 @@ host_mode() {
   kick_user() {
     if [ "$allow_kick_user" == "true" ]; then
       kicked_user=$1
-      # Get sshd process with users name and get its PID.
-      user_pid=`ps aux | grep "$kicked_user.*sshd" | grep -v grep | tr -s ' ' | cut -d ' ' -f 2`
       echo "Kicking $kicked_user from the server. Sudo required."
+      # Get sshd process with users name and get its PID.
+      user_pid=`sudo lsof -t -u $kicked_user -c sshd -a`
       # Kill the sshd process of the supplied user.
       redirect=`sudo kill -9 $user_pid 2>&1`; kicked_successfully=$?
       # Remove any tmux sessions ending in "-kicked_user"
