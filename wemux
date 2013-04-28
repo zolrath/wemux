@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # wemux by Matt Furden @zolrath
 #
 # wemux allows you to start a shared tmux session using the command 'wemux'.
