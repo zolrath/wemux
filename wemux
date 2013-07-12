@@ -373,6 +373,7 @@ host_mode() {
     echo ""
     if [ "$allow_server_change" == "true" ]; then
       echo "    [j] join [name]: Join the specified wemux server."
+      echo "    [j]        join: Display the current wemux server."
       echo "    [d]       reset: Join default wemux server: $default_server_name"
       if [ "$allow_server_list" == "true" ]; then
         echo "    [l]        list: List all currently active wemux servers."
@@ -521,6 +522,7 @@ client_mode() {
     echo ""
     if [ "$allow_server_change" == "true" ]; then
       echo "    [j] join [name]: Join the specified wemux server."
+      echo "    [j]        join: Display the current wemux server."
       echo "    [d]       reset: Join default wemux server: $default_server_name"
       if [ "$allow_server_list" == "true" ]; then
         echo "    [l]        list: List all currently active wemux servers."
