@@ -71,7 +71,7 @@ host_list=(change_this)
 
 ## Location of tmux socket, will have server name appended to end:
 ## Defaults to "/tmp/wemux"
-# socket-prefix="/tmp/wemux"
+# socket_prefix="/tmp/wemux"
 
 ## Tmux Options:
 ## Defaults to -u to have tmux always attempt to use utf-8 mode.
