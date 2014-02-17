@@ -295,7 +295,16 @@ host_mode() {
       chmod 1777 $socket
       echo "wemux server started on '$server'."
     fi
+#    reattach
+  }
+
+  start_attached_server() {
+    start_server
     reattach
+  }
+
+  start_detached_server() {
+    start_server
   }
 
   # Reattach to the wemux server.
@@ -368,6 +377,7 @@ host_mode() {
     echo "To host a wemux server please use one of the following:"
     echo ""
     echo "    [s]       start: Start the wemux server/attach to an existing wemux server."
+    echo "    [sd]      start_detached: Start the wemux server and stay detached."
     echo "    [a]      attach: Attach to an existing wemux server."
     echo "    [k]        stop: Kill the wemux server '$server', delete its socket."
     echo ""
@@ -393,28 +403,29 @@ host_mode() {
   # Host mode command handling:
   # If no command given, call start server.
   if [ -z "$1" ]; then
-    announce_connection "host" start_server
+    announce_connection "host" start_attached_server
   else
     case "$1" in
-      start|s)        announce_connection "host" start_server;;
-      attach|a)       announce_connection "host" reattach;;
-      stop|st)        shift; stop_server "$@";;
-      kill|k)         shift; stop_server "$@";;
-      help|h)         display_host_commands;;
-      join|j)         shift; change_server "$@";;
-      name|n)         shift; change_server "$@";;
-      reset|d)        change_server "$default_server_name";;
-      list|l)         list_active_servers;;
-      users|u)        list_users;;
-      kick)           kick_user $2;;
-      status_users)   status_users;;
-      display_users)  display_users;;
-      version|v)      display_version;;
-      conf*|c)        $editor /usr/local/etc/wemux.conf;;
-      *)              if ! $wemux "$@"; then
-                        echo "To see a list of wemux commands enter 'wemux help'"
-                        exit 127
-                      fi;;
+      start|s)            announce_connection "host" start_attached_server;;
+      start_detached|sd)  announce_connection "host" start_detached_server;;
+      attach|a)           announce_connection "host" reattach;;
+      stop|st)            shift; stop_server "$@";;
+      kill|k)             shift; stop_server "$@";;
+      help|h)             display_host_commands;;
+      join|j)             shift; change_server "$@";;
+      name|n)             shift; change_server "$@";;
+      reset|d)            change_server "$default_server_name";;
+      list|l)             list_active_servers;;
+      users|u)            list_users;;
+      kick)               kick_user $2;;
+      status_users)       status_users;;
+      display_users)      display_users;;
+      version|v)          display_version;;
+      conf*|c)            $editor /usr/local/etc/wemux.conf;;
+      *)                  if ! $wemux "$@"; then
+                            echo "To see a list of wemux commands enter 'wemux help'"
+                            exit 127
+                          fi;;
     esac
   fi
 }
