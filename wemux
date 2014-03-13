@@ -461,6 +461,7 @@ host_mode() {
     echo ""
     if [ "$allow_server_change" == "true" ]; then
       echo "    [j] join [name]: Join the specified wemux server."
+      echo "    [j]        join: Display the current wemux server."
       echo "    [d]       reset: Join default wemux server: $default_server_name"
       if [ "$allow_server_list" == "true" ]; then
         echo "    [l]        list: List all currently active wemux servers."
@@ -622,6 +623,7 @@ client_mode() {
     echo ""
     if [ "$allow_server_change" == "true" ]; then
       echo "    [j] join [name]: Join the specified wemux server."
+      echo "    [j]        join: Display the current wemux server."
       echo "    [d]       reset: Join default wemux server: $default_server_name"
       if [ "$allow_server_list" == "true" ]; then
         echo "    [l]        list: List all currently active wemux servers."
@@ -714,7 +716,7 @@ elif [[ $@ == "help" ]] || [[ $@ == "h" ]]; then
   echo "HOST ONLY COMMANDS:"
   echo "    [s]      summon: Summon all mirrored users to your current session."
   echo "          summonall: Summon all users to your current session."
-  echo "        setmirrored: Set all users to mirror mode at your current session."
+  echo "        setmirrored: Set all users to mirror mode to your current session."
   echo "     togglemirrored: Toggle users between mirror/pair mode."
   echo "        kick [user]: Kick specified user from the server."
   echo ""

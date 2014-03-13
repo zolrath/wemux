@@ -170,6 +170,12 @@ and notifications when users attach/detach.
     $ wemux j 1
     Changed wemux server from 'rails' to 'project-x'
 
+#### wemux join
+  Join with no argument simply displays the current wemux server, if you're into that.
+
+    $ wemux join
+    Current wemux server: wemux
+
 ### Resetting the Server Name
   In order to easily return to the default server you can run `wemux reset`
 #### wemux reset
