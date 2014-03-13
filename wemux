@@ -574,6 +574,14 @@ client_mode() {
     fi
   }
 
+  send() {
+    if [ "$allow_pair_mode" == "true" ||  "$allow_rogue_mode" == "true"]; then
+      $wemux send "$@"
+    else
+      echo "Pairing and Rogue mode are off, sending is disabled."
+    fi
+  }
+
   smart_reattach() {
     # If default_client_mode has been set to "rogue" in wemux.conf:
     if [ "$default_client_mode" == "rogue" ] && [ "$allow_rogue_mode" == "true" ]; then
@@ -662,6 +670,7 @@ client_mode() {
       status_users)  status_users;;
       display_users) display_users;;
       version|v)     display_version;;
+      send)          send $@;;
       *)             if ! $wemux "$@"; then
                        echo "To see a list of wemux commands enter 'wemux help'"
                        exit 127
@@ -679,7 +688,7 @@ user_is_a_host() {
 }
 
 allowed_nested_command() {
-  commands=(togglemirrored setmirrored summon summon_all users u list l display_users
+  commands=(togglemirrored setmirrored summon summon_all send users u list l display_users
   status_users list-clients kill-sesssion kick version v)
   for command in "${commands[@]}"; do
     [[ "$command" == "$1" ]] && return 0
