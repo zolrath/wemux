@@ -577,7 +577,7 @@ client_mode() {
 
   send() {
     if [ "$allow_pair_mode" == "true" -o "$allow_rogue_mode" == "true" ]; then
-      $wemux send "$@"
+      $wemux "$@"
     else
       echo "Pairing and Rogue mode are off, sending is disabled."
     fi
