@@ -1,4 +1,4 @@
-![wemux: Multi-User Tmux Sessions Made Easy](http://i.imgur.com/iOjcz.png) 
+![wemux: Multi-User Tmux Sessions Made Easy](http://i.imgur.com/iOjcz.png)
 ********************************************************************************
 
 wemux enhances tmux to make multi-user terminal multiplexing both easier and
@@ -195,6 +195,12 @@ and notifications when users attach/detach.
     $ wemux j 1
     Changed wemux server from 'rails' to 'project-x'
 
+#### wemux join
+  Join with no argument simply displays the current wemux server, if you're into that.
+
+    $ wemux join
+    Current wemux server: wemux
+
 ### Resetting the Server Name
   In order to easily return to the default server you can run `wemux reset`
 #### wemux reset
@@ -240,7 +246,7 @@ and notifications when users attach/detach.
 
 ### Rogue Mode
   Rogue mode can be disabled, only allowing clients to attach to the server in
-  mirror mode by setting `allow_rogue_mode="false"`
+  mirror or pair mode by setting `allow_rogue_mode="false"`
 
 ### Default Client Mode
  When clients enter 'wemux' with no arguments by default it will first attempt to

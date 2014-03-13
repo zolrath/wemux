@@ -43,7 +43,7 @@
 ###############################################################################
 
 # Current wemux version.
-version="3.1.0"
+version="3.2.0"
 
 # Setup and Configuration Files.
 # Default settings, modify them in the /usr/local/etc/wemux.conf file:
@@ -173,6 +173,33 @@ status_users() {
   fi
 }
 
+list_all_users() {
+  if [ "$allow_user_list" == "true" ]; then
+      wemux_server_sockets=$socket_prefix*
+      for wemux_server in $wemux_server_sockets; do
+        server_running=`tmux -S $wemux_server list-clients`
+        if [[ "$server_running" ]] && [[ "$server_running" != *"failed to connect"* ]]; then
+          server_name=`echo "$wemux_server" | sed -e "s,$socket_prefix-,,"`
+          echo "Users connected to '$server_name':"
+          # Get list of users with status_users function.
+          while IFS= read line; do
+            read tty mode <<<$(echo $line)
+            # Get user associated with tty
+            name=`stat -f%Su $tty 2>/dev/null` || name=`stat -c%U $tty 2>/dev/null`
+            # If user is attached in read-only mode, set mode to [m]
+            [[ $mode == "(ro)" ]] && mode="[m]" || mode=""
+            # If user/mode is already is userlist, do not add them again.
+            user="$name$mode"
+            num=$[num+1]
+            echo "  $num. $user"
+          done < <(tmux -S $wemux_server list-clients | cut -f1,6 -d ' ' | sed s/://)
+        fi
+      done
+  else
+    echo "User listing has been disabled."
+  fi
+}
+
 # List users currently attached to wemux server with informative string.
 # More verbose, intended for use in terminal.
 list_users() {
@@ -205,6 +232,67 @@ list_users() {
 # Display the currently attached users verbosely in a tmux message.
 display_users() {
     redirect=`$wemux display-message "$(wemux users)" 2>&1`
+}
+
+# Returns the host's tty and server name.
+get_host_session() {
+  redirect=`wemux server-info 2>&1`; server_running=$?
+  if [ "$server_running" == 0 ]; then
+    while read line; do
+      read tty current_session <<<$(echo $line)
+      # Get user associated with tty
+      name=`stat -f%Su $tty 2>/dev/null` || name=`stat -c%U $tty 2>/dev/null`
+      if [[ $name == $username ]]; then
+        host=$tty
+        host_session=$current_session
+      fi
+    done < <(wemux list-clients | cut -f1,2 -d ' ' | sed s/://)
+  echo "$host $host_session"
+  fi
+}
+
+# Toggles mirrored users to pair mode, pair mode to mirrored.
+mirror_toggle() {
+  get_host_session > read host host_session
+  while read tty; do
+    if ! [[ $tty == $host ]]; then
+      redirect=`$wemux switch-client -c $tty -t $host_session -r 2>&1`
+    fi
+  done < <(wemux list-clients | cut -f1 -d ' ' | sed s/://)
+}
+
+# Set all users to mirror mode on the hosts current session
+mirror_all_users() {
+  get_host_session > read host host_session
+  while read line; do
+    read tty mode <<<$(echo $line)
+    if ! [[ $tty == $host ]] && [[ $mode == "(ro)" ]]; then
+      redirect=`$wemux switch-client -c $tty -t $host_session 2>&1`
+    elif ! [[ $tty == $host ]]; then
+      redirect=`$wemux switch-client -c $tty -t $host_session -r 2>&1`
+    fi
+  done < <(wemux list-clients | cut -f1,6 -d ' ' | sed s/://)
+}
+
+# Make all users join the hosts session.
+summon_all_users() {
+  get_host_session > read host host_session
+  while read tty; do
+    if ! [[ $tty == $host ]]; then
+      $wemux switch-client -c $tty -t $host_session
+    fi
+  done < <(wemux list-clients | cut -f1 -d ' ' | sed s/://)
+}
+
+# Make all mirrored users join the hosts session.
+summon_mirrored() {
+  get_host_session > read host host_session
+  while read line; do
+    read tty mode <<<$(echo $line)
+    if ! [[ $tty == $host ]] && [[ $mode == "(ro)" ]]; then
+      $wemux switch-client -c $tty -t $host_session
+    fi
+  done < <(wemux list-clients | cut -f1,6 -d ' '| sed s/://)
 }
 
 # The ugly group of redirects below solve the issue where tmux/epoll causes tmux
@@ -373,6 +461,7 @@ host_mode() {
     echo ""
     if [ "$allow_server_change" == "true" ]; then
       echo "    [j] join [name]: Join the specified wemux server."
+      echo "    [j]        join: Display the current wemux server."
       echo "    [d]       reset: Join default wemux server: $default_server_name"
       if [ "$allow_server_list" == "true" ]; then
         echo "    [l]        list: List all currently active wemux servers."
@@ -405,7 +494,11 @@ host_mode() {
       name|n)         shift; change_server "$@";;
       reset|d)        change_server "$default_server_name";;
       list|l)         list_active_servers;;
-      users|u)        list_users;;
+      users|u)        list_all_users;;
+      summon)         summon_mirrored;;
+      summon_all)     summon_all_users;;
+      setmirrored)    mirror_all_users;;
+      togglemirrored) mirror_toggle;;
       kick)           kick_user $2;;
       status_users)   status_users;;
       display_users)  display_users;;
@@ -454,6 +547,7 @@ client_mode() {
       elif session_exists; then
         $wemux new-session -d -t $server -s $client_session
         $wemux new-window -n $username
+        $wemux send-keys -t $client_session $@
         $wemux attach -t $client_session
       else
         echo "No wemux server to go 'rogue' with on '$server'."
@@ -478,6 +572,14 @@ client_mode() {
     else
       echo "Rogue mode is disabled."
       return 126
+    fi
+  }
+
+  send() {
+    if [ "$allow_pair_mode" == "true" ||  "$allow_rogue_mode" == "true"]; then
+      $wemux send "$@"
+    else
+      echo "Pairing and Rogue mode are off, sending is disabled."
     fi
   }
 
@@ -521,6 +623,7 @@ client_mode() {
     echo ""
     if [ "$allow_server_change" == "true" ]; then
       echo "    [j] join [name]: Join the specified wemux server."
+      echo "    [j]        join: Display the current wemux server."
       echo "    [d]       reset: Join default wemux server: $default_server_name"
       if [ "$allow_server_list" == "true" ]; then
         echo "    [l]        list: List all currently active wemux servers."
@@ -556,7 +659,7 @@ client_mode() {
     case "$1" in
       mirror|m)      announce_connection "mirror" mirror_mode;;
       pair|p)        announce_connection "pair" pair_mode;;
-      rogue|r)       announce_connection "rogue" rogue_mode;;
+      rogue|r)       shift; announce_connection "rogue" rogue_mode $@;;
       edit|e)        announce_connection "rogue" rogue_mode;;
       logout|o)      logout_rogue;;
       stop|s)        logout_rogue;;
@@ -569,6 +672,7 @@ client_mode() {
       status_users)  status_users;;
       display_users) display_users;;
       version|v)     display_version;;
+      send)          send $@;;
       *)             if ! $wemux "$@"; then
                        echo "To see a list of wemux commands enter 'wemux help'"
                        exit 127
@@ -586,8 +690,8 @@ user_is_a_host() {
 }
 
 allowed_nested_command() {
-  commands=(users u list l display_users status_users list-clients
-  kill-sesssion kick version v)
+  commands=(togglemirrored setmirrored summon summon_all send users u list l display_users
+  status_users list-clients kill-sesssion kick version v)
   for command in "${commands[@]}"; do
     [[ "$command" == "$1" ]] && return 0
   done
@@ -610,6 +714,20 @@ if [[ "$TMUX" != *$socket* ]] || allowed_nested_command "$1" ; then
       client_mode "$@"
     fi
   fi
+elif [[ $@ == "help" ]] || [[ $@ == "h" ]]; then
+  echo "Most wemux commands can only be run while detached from tmux."
+  echo "The commands that are available while attached are:"
+  echo ""
+  echo "HOST ONLY COMMANDS:"
+  echo "    [s]      summon: Summon all mirrored users to your current session."
+  echo "          summonall: Summon all users to your current session."
+  echo "        setmirrored: Set all users to mirror mode to your current session."
+  echo "     togglemirrored: Toggle users between mirror/pair mode."
+  echo "        kick [user]: Kick specified user from the server."
+  echo ""
+  echo "GENERAL COMMANDS:"
+  echo "    [u]  users: List all attached users"
+  echo "    [l]   list: List all wemux servers"
 else
   echo "You're already attached to the wemux server on '$server'"
   echo "wemux does not allow nesting wemux servers directly."
