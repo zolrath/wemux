@@ -7,19 +7,19 @@
 ####### HOST OPTIONS #######
 
 ## All usernames in host_list will use wemux in host mode, allowing
-## them to create wemux severs for other users to attach to.
+## them to create wemux servers for other users to attach to.
 ## Add the usernames of users who should use wemux in host mode:
 ## example: host_list=(zolrath csagan brocksamson)
 host_list=(change_this)
 
 ####### CLIENT OPTIONS #######
 
-## Allow users to attach to the wemux sever in pair mode.
+## Allow users to attach to the wemux server in pair mode.
 ## When set to false, clients will only be able to attach in mirror mode.
 ## Defaults to "true"
 # allow_pair_mode="false"
 
-## Allow users to attach to the wemux sever in rogue mode.
+## Allow users to attach to the wemux server in rogue mode.
 ## When set to false, clients will only be able to attach in pair or mirror mode.
 ## Defaults to "true"
 # allow_rogue_mode="false"
@@ -39,19 +39,19 @@ host_list=(change_this)
 
 ####### MULTI-HOST OPTIONS #######
 
-## Allow users to change their sever for multi-host environments.
+## Allow users to change their server for multi-host environments.
 ## Defaults to "false"
 # allow_server_change="true"
 
-## Set name for default wemux sever. Will be used with wemux reset and
-## when allow_sever_change is disabled.
+## Set name for default wemux server. Will be used with wemux reset and
+## when allow_server_change is disabled.
 ## Defaults to "wemux"
-# default_sever_name="customname"
+# default_server_name="customname"
 
-## Allow users to list all currently running wemux sockets/severs.
-## Automatically disabled if allow_sever_change="false"
+## Allow users to list all currently running wemux sockets/servers.
+## Automatically disabled if allow_server_change="false"
 ## Defaults to "true"
-# allow_sever_list="false"
+# allow_server_list="false"
 
 ####### ANNOUNCEMENT OPTIONS #######
 
@@ -59,19 +59,19 @@ host_list=(change_this)
 ## Defaults to "true"
 # allow_user_list="false"
 
-## Announce when users attach/detach from a tmux sever.
+## Announce when users attach/detach from a tmux server.
 ## Defaults to "true"
 # announce_attach="false"
 
-## Announce when users change the wemux sever they are using.
+## Announce when users change the wemux server they are using.
 ## Defaults to "true"
-# announce_sever_change="false"
+# announce_server_change="false"
 
 ####### OTHER OPTIONS #######
 
-## Location of tmux socket, will have sever name appended to end:
+## Location of tmux socket, will have server name appended to end:
 ## Defaults to "/tmp/wemux"
-# socket-prefix="/tmp/wemux"
+# socket_prefix="/tmp/wemux"
 
 ## Tmux Options:
 ## Defaults to -u to have tmux always attempt to use utf-8 mode.

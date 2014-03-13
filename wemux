@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # wemux by Matt Furden @zolrath
 #
 # wemux allows you to start a shared tmux session using the command 'wemux'.
@@ -399,9 +399,9 @@ host_mode() {
   kick_user() {
     if [ "$allow_kick_user" == "true" ]; then
       kicked_user=$1
-      # Get sshd process with users name and get its PID.
-      user_pid=`ps aux | grep "$kicked_user.*sshd" | grep -v grep | tr -s ' ' | cut -d ' ' -f 2`
       echo "Kicking $kicked_user from the server. Sudo required."
+      # Get sshd process with users name and get its PID.
+      user_pid=`sudo lsof -t -u $kicked_user -c sshd -a`
       # Kill the sshd process of the supplied user.
       redirect=`sudo kill -9 $user_pid 2>&1`; kicked_successfully=$?
       # Remove any tmux sessions ending in "-kicked_user"
@@ -487,11 +487,11 @@ host_mode() {
     case "$1" in
       start|s)        announce_connection "host" start_server;;
       attach|a)       announce_connection "host" reattach;;
-      stop|st)        shift; stop_server $@;;
-      kill|k)         shift; stop_server $@;;
+      stop|st)        shift; stop_server "$@";;
+      kill|k)         shift; stop_server "$@";;
       help|h)         display_host_commands;;
-      join|j)         shift; change_server $@;;
-      name|n)         shift; change_server $@;;
+      join|j)         shift; change_server "$@";;
+      name|n)         shift; change_server "$@";;
       reset|d)        change_server "$default_server_name";;
       list|l)         list_active_servers;;
       users|u)        list_all_users;;
@@ -664,8 +664,8 @@ client_mode() {
       logout|o)      logout_rogue;;
       stop|s)        logout_rogue;;
       help|h)        display_client_commands;;
-      join|j)        shift; change_server $@;;
-      name|n)        shift; change_server $@;;
+      join|j)        shift; change_server "$@";;
+      name|n)        shift; change_server "$@";;
       reset|d)       change_server "$default_server_name";;
       list|l)        list_active_servers;;
       users|u)       list_users;;
@@ -703,11 +703,16 @@ build_wemux_prefix
 
 # Don't allow wemux to be run directly within a wemux server.
 if [[ "$TMUX" != *$socket* ]] || allowed_nested_command "$1" ; then
-  # If user is in host list, use host mode. If not, use client mode.
-  if user_is_a_host; then
-    host_mode "$@"
+  # Allow manual override to operate in client mode.
+  if [ "$1" = "client" ]; then
+    shift; client_mode "$@"
   else
-    client_mode "$@"
+    # If user is in host list, use host mode. If not, use client mode.
+    if user_is_a_host; then
+      host_mode "$@"
+    else
+      client_mode "$@"
+    fi
   fi
 elif [[ $@ == "help" ]] || [[ $@ == "h" ]]; then
   echo "Most wemux commands can only be run while detached from tmux."
