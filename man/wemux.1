@@ -1,4 +1,7 @@
-.TH "WEMUX" "1" "April 2012" "" ""
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "WEMUX" "1" "March 2014" "" ""
 .
 .SH "NAME"
 \fBwemux\fR \- multi\-user tmux sessions made easy
@@ -40,13 +43,10 @@ WEMUX CLIENT COMMANDS:
 \fBwemux pair\fR
 .
 .br
+\fBwemux rogue\fR
+.
+.br
 \fBwemux logout\fR
-.
-.br
-\fBwemux users\fR
-.
-.br
-\fBwemux help\fR
 .
 .br
 WEMUX SESSION COMMANDS:
@@ -85,7 +85,7 @@ Attach to an existing wemux session\.
 .SS "wemux stop"
 Kill the wemux session and remove the /tmp/wemux\-wemux socket\.
 .
-.SS "wemux kick <username>"
+.SS "wemux kick <var>username</var>"
 Kick an SSH user from the server and remove their wemux pair sessions\.
 .
 .SS "wemux config"
@@ -102,20 +102,23 @@ Attach to session in read\-only mode\.
 .SS "wemux pair"
 Attach to session in pair mode, which allows editing\.
 .
+.SS "wemux rogue"
+Attach to server in rogue mode, which allows editing and switching to windows independently from the host\.
+.
 .SS "wemux logout"
 Remove your pair mode session\.
 .
 .SS "wemux"
-When \fBwemux\fR is run without any arguments in client mode, its behavior attempts to intelligently select mirror or pair:
+When \fBwemux\fR is run without any arguments in client mode, its behavior attempts to intelligently select mirror, pair or rogue:
 .
 .IP "\(bu" 4
-If the client does not have an existing pair session it will attach to the wemux session in mirror mode\.
+If the client does not have an existing rogue session it will attach to the wemux session in pair mode\.
 .
 .IP "\(bu" 4
-If the client has already started a wemux pair mode session, it will reattach to the session in pair mode\.
+If the client has already started a wemux rogue mode session, it will reattach to the session in rogue mode\.
 .
 .IP "\(bu" 4
-By setting \fBdefault_client_mode="pair"\fR in \fBwemux\.conf\fR this can be changed to always join in pair mode, even if a pair session doesn\'t already exist\.
+By setting \fBdefault_client_mode="rogue"\fR in \fBwemux\.conf\fR this can be changed to always join in pair mode, even if a pair session doesn\'t already exist\.
 .
 .IP "" 0
 .
@@ -211,7 +214,7 @@ Changed wemux session from \'project\-x\' to \'wemux\'
 .
 .IP "" 0
 .
-.SS "wemux join <sessionname>"
+.SS "wemux join <var>sessionname</var>"
 Join wemux session with specified name\.
 .
 .IP "" 4
@@ -225,7 +228,7 @@ Changed wemux session from \'wemux\' to \'rails\'
 .
 .IP "" 0
 .
-.SS "wemux join <sessionnumber>"
+.SS "wemux join <var>sessionnumber</var>"
 Alternatively, enter the session number displayed next to the session name in \fBwemux list\fR\.
 .
 .IP "" 4
@@ -301,11 +304,14 @@ host_list=(zolrath hostusername brocksamson)
 .SS "Pair Mode"
 Pair mode can be disabled, only allowing clients to attach to the session in mirror mode by setting \fBallow_pair_mode="false"\fR
 .
+.SS "Rogue Mode"
+Rogue mode can be disabled, only allowing clients to attach to the server in mirror or pair mode by setting \fBallow_rogue_mode="false"\fR
+.
 .SS "Default Client Mode"
-When clients enter \'wemux\' with no arguments by default it will first attempt to join an existing pair mode session\. If there is no pair session it will start a mirror mode session\. By setting default_client_mode to "pair", \'wemux\' with no arguments will always join a pair mode session, even if it has to create it\.
+When clients enter \'wemux\' with no arguments by default it will first attempt to join an existing rogue mode session\. If there is no rogue session it will start in pair mode\. By setting default_client_mode to "rogue", \'wemux\' with no arguments will always join a rogue mode session, even if it has to create it\.
 .
 .P
-This can be changed by setting \fBdefault_client_mode="pair"\fR
+This can be changed by setting \fBdefault_client_mode="rogue"\fR
 .
 .SS "Default Session Name"
 The default wemux session name will be used with \fBwemux reset\fR and when \fBallow_session_change\fR is not enabled in \fBwemux\.conf\fR\.
@@ -378,17 +384,14 @@ This can be disabled by setting \fBannounce_session_change="false"\fR
 To make an SSHed user start in a wemux mode automatically, add one of the following lines to the users \fB\.bash_profile\fR or \fB\.zshrc\fR
 .
 .P
-\fBOption 1\fR: Automatically log the client into mirror mode upon login, disconnect them from the server when they detach\.
-.
-.P
-\fBwemux mirror; exit\fR
+\fBOption 1\fR: Automatically log the client into mirror mode upon login, disconnect them from the server when they detach\. \fBwemux mirror; exit\fR
 .
 .br
 .
 .P
 \fBOption 2\fR: Automatically start the client in mirror mode but allow them to detach\.
 .
-.P
+.br
 \fBwemux mirror\fR
 .
 .br
@@ -396,7 +399,7 @@ To make an SSHed user start in a wemux mode automatically, add one of the follow
 .P
 \fBOption 3\fR: Automatically start the client in pair mode but allow them to detach\.
 .
-.P
+.br
 \fBwemux pair\fR
 .
 .br
@@ -404,11 +407,10 @@ To make an SSHed user start in a wemux mode automatically, add one of the follow
 .P
 \fBOption 4\fR: Only display the connection commands, don\'t automatically start any modes\.
 .
-.P
+.br
 \fBwemux help\fR
 .
 .br
 .
 .P
 Please note that this does not ensure a logged in user will not be able to exit tmux and access their shell\. If the user is not trusted, you must perform any security measures one would normally perform for a remote user\.
-

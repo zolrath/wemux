@@ -1,4 +1,4 @@
-![wemux: Multi-User Tmux Sessions Made Easy](http://i.imgur.com/iOjcz.png) 
+![wemux: Multi-User Tmux Sessions Made Easy](http://i.imgur.com/iOjcz.png)
 ********************************************************************************
 
 wemux enhances tmux to make multi-user terminal multiplexing both easier and
@@ -215,7 +215,7 @@ and notifications when users attach/detach.
 
 ### Rogue Mode
   Rogue mode can be disabled, only allowing clients to attach to the server in
-  mirror mode by setting `allow_rogue_mode="false"`
+  mirror or pair mode by setting `allow_rogue_mode="false"`
 
 ### Default Client Mode
  When clients enter 'wemux' with no arguments by default it will first attempt to
