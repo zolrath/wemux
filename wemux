@@ -48,6 +48,7 @@ version="3.2.0"
 # Setup and Configuration Files.
 # Default settings, modify them in the /usr/local/etc/wemux.conf file:
 host_list=(change_this_in_wemux_conf)
+host_groups=()
 socket_prefix="/tmp/wemux"
 options="-u"
 allow_pair_mode="true"
@@ -681,13 +682,28 @@ client_mode() {
   fi
 }
 
+# Determine the groups the user belongs to
+groups_for_user() {
+  echo $(groups $username | awk -F: "{print \$NF}");
+}
+
 # Check if current user is listed in the host_list.
 user_is_a_host() {
   for user in "${host_list[@]}"; do
     [[ "$user" == "$username" ]] && return 0
   done
+
+  # If the user is not in the host list, check their groups
+  user_groups="$(groups_for_user)";
+  for group in ${host_groups[@]}; do
+    if [[ $user_groups =~ " $group " ]]; then
+      return 0
+    fi
+  done
+
   return 1
 }
+
 
 allowed_nested_command() {
   commands=(togglemirrored setmirrored summon summon_all send users u list l display_users

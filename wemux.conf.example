@@ -10,7 +10,9 @@
 ## them to create wemux servers for other users to attach to.
 ## Add the usernames of users who should use wemux in host mode:
 ## example: host_list=(zolrath csagan brocksamson)
-host_list=(change_this)
+
+## All users in any of the groups in host_groups will also use wemux in host mode.
+## example: host_groups=(wheel wemux)
 
 ####### CLIENT OPTIONS #######
 
