@@ -696,7 +696,8 @@ user_is_a_host() {
   # If the user is not in the host list, check their groups
   user_groups="$(groups_for_user)";
   for group in ${host_groups[@]}; do
-    if [[ $user_groups =~ " $group " ]]; then
+    group_re="\\b${group}\\b"
+    if [[ $user_groups =~ $group_re ]]; then
       return 0
     fi
   done
