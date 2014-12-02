@@ -20,6 +20,12 @@ and notifications when users attach/detach.
 ## How To Install
   **IMPORTANT**: Wemux required tmux version >= 1.6
   
+### MacPorts (on OS X)
+  If you have [MacPorts](https://www.macports.org/) installed you can
+  install wemux with a very simple:
+
+    sudo port install wemux
+
 ### Homebrew (on OS X)
   If you have [Homebrew](http://mxcl.github.com/homebrew/) installed you can
   install wemux with a fairly simple:
