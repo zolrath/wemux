@@ -193,7 +193,7 @@ list_all_users() {
             user="$name$mode"
             num=$[num+1]
             echo "  $num. $user"
-          done < <(tmux -S $wemux_server list-clients | cut -f1,6 -d ' ' | sed s/://)
+          done < <(tmux -S $wemux_server list-clients -F '#{client_tty}')
         fi
       done
   else
@@ -247,7 +247,7 @@ get_host_session() {
         host=$tty
         host_session=$current_session
       fi
-    done < <(wemux list-clients | cut -f1,2 -d ' ' | sed s/://)
+    done < <(wemux list-clients -F '#{client_tty}')
   echo "$host $host_session"
   fi
 }
@@ -259,7 +259,7 @@ mirror_toggle() {
     if ! [[ $tty == $host ]]; then
       redirect=`$wemux switch-client -c $tty -t $host_session -r 2>&1`
     fi
-  done < <(wemux list-clients | cut -f1 -d ' ' | sed s/://)
+  done < <(wemux list-clients -F '#{client_tty}')
 }
 
 # Set all users to mirror mode on the hosts current session
@@ -272,7 +272,7 @@ mirror_all_users() {
     elif ! [[ $tty == $host ]]; then
       redirect=`$wemux switch-client -c $tty -t $host_session -r 2>&1`
     fi
-  done < <(wemux list-clients | cut -f1,6 -d ' ' | sed s/://)
+  done < <(wemux list-clients -F '#{client_tty}')
 }
 
 # Make all users join the hosts session.
@@ -282,7 +282,7 @@ summon_all_users() {
     if ! [[ $tty == $host ]]; then
       $wemux switch-client -c $tty -t $host_session
     fi
-  done < <(wemux list-clients | cut -f1 -d ' ' | sed s/://)
+  done < <(wemux list-clients -F '#{client_tty}')
 }
 
 # Make all mirrored users join the hosts session.
@@ -293,7 +293,7 @@ summon_mirrored() {
     if ! [[ $tty == $host ]] && [[ $mode == "(ro)" ]]; then
       $wemux switch-client -c $tty -t $host_session
     fi
-  done < <(wemux list-clients | cut -f1,6 -d ' '| sed s/://)
+  done < <(wemux list-clients -F '#{client_tty}')
 }
 
 # The ugly group of redirects below solve the issue where tmux/epoll causes tmux
