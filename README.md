@@ -24,7 +24,7 @@ and notifications when users attach/detach.
   If you have [Homebrew](http://mxcl.github.com/homebrew/) installed you can
   install wemux with a fairly simple:
 
-    brew install https://github.com/downloads/zolrath/wemux/wemux.rb
+    brew install wemux
 
   The user that installed wemux will automatically be added to the wemux host list.
   To change the host or add more hosts, edit `/usr/local/etc/wemux.conf` and add the
