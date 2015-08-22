@@ -326,9 +326,10 @@ announce_connection() {
   [ "$announce_attach" == "true" ] && redirect=`$wemux display-message \
     "$username has attached in $connection_type mode." 2>&1`
   $attach_commands
+  status=$?
   [ "$announce_attach" == "true" ] && redirect=`$wemux display-message \
     "$username has detached." 2>&1`
-  return 0
+  return $status
 }
 
 # Announces when a user joins/changes their server.
@@ -521,6 +522,7 @@ client_mode() {
       $wemux attach -t $server -r
     else
       echo "No wemux server to mirror on '$server'."
+      return 126
     fi
   }
 
@@ -531,6 +533,7 @@ client_mode() {
         $wemux attach -t $server
       else
         echo "No wemux server to pair with on '$server'."
+        return 126
       fi
     else
       echo "Pair mode is disabled."
@@ -552,6 +555,7 @@ client_mode() {
         $wemux attach -t $client_session
       else
         echo "No wemux server to go 'rogue' with on '$server'."
+        return 126
       fi
     else
       echo "Rogue mode is disabled."
@@ -569,6 +573,7 @@ client_mode() {
         echo "Logged out of rogue mode on '$server'."
       else
         echo "No wemux server to log out of on '$server'."
+        return 126
       fi
     else
       echo "Rogue mode is disabled."
@@ -599,6 +604,7 @@ client_mode() {
       announce_connection "mirror" $wemux attach -t $server -r
     else
       echo "No wemux server to attach to on '$server'"
+      return 126
     fi
   }
 
