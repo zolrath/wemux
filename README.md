@@ -18,7 +18,7 @@ It features multi-server support as well as user listing
 and notifications when users attach/detach.
 
 ## How To Install
-  **IMPORTANT**: Wemux required tmux version >= 1.6
+  **IMPORTANT**: Wemux requires tmux version >= 1.6
   
 ### Homebrew (on OS X)
   If you have [Homebrew](http://mxcl.github.com/homebrew/) installed you can
