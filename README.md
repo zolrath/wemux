@@ -52,12 +52,9 @@ and notifications when users attach/detach.
 
   Git clone this repo.
 
-    git clone git://github.com/zolrath/wemux.git /usr/local/share/wemux
-
-  Symlink the `wemux` file into your $PATH via `/usr/local/bin/`,
-  being sure to use the full path.
-
-    ln -s /usr/local/share/wemux/wemux /usr/local/bin/wemux
+    git clone git://github.com/zolrath/wemux.git
+    cd wemux
+    sudo make install
 
   **IMPORTANT**: Copy the `wemux.conf.example` file to `/usr/local/etc/wemux.conf`
 
