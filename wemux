@@ -9,8 +9,10 @@
 # in another window (separate cursors) in the hosts tmux session.
 #
 # To set a user as host add their username to the host_list in the configuration
-# file located at /usr/local/etc/wemux.conf
-# Other configuations options are also located in /usr/local/etc/wemux.conf
+# file.
+# Other configuations options are also located in the configuration file.
+# The configuration file is located in /usr/local/etc/wemux.conf by default but
+# could be overwritten by setting the $WEMUX_CONFIG environment variable.
 #
 # For environments with multiple hosts running their own independent servers
 # on the same machine wemux can join different servers with the wemux join
@@ -46,7 +48,7 @@
 version="3.2.0"
 
 # Setup and Configuration Files.
-# Default settings, modify them in the /usr/local/etc/wemux.conf file:
+# Default settings, modify them in the config file:
 host_list=(change_this_in_wemux_conf)
 host_groups=()
 socket_prefix="/tmp/wemux"
@@ -66,9 +68,11 @@ announce_server_change="true"
 username=`whoami`
 # Set $EDITOR default to vi if not configured on host machine.
 editor=${EDITOR:="vi"}
+# Sets configuration path
+config_file=${WEMUX_CONFIG:="/usr/local/etc/wemux.conf"}
 
-# Load configuration options from /usr/local/etc/wemux.conf
-[ -f /usr/local/etc/wemux.conf ] && . /usr/local/etc/wemux.conf
+# Load configuration options from config file
+[ -f $config_file ] && . $config_file
 
 # Sanitize server name, replace spaces and underscores with dashes.
 # Remove all non alpha-numeric characters, convert to lowercase.
@@ -318,7 +322,7 @@ kill_server_successful() {
 }
 
 # Announce when user attaches/detaches from server.
-# Can be disabled by changing announce_attach to false in /usr/local/etc/wemux.conf
+# Can be disabled by changing announce_attach to false in the config file.
 # The first argument specifies the mode the user is attaching in for the message
 # All additional arguments get wrapped in the attach/detach messages.
 announce_connection() {
@@ -333,7 +337,7 @@ announce_connection() {
 }
 
 # Announces when a user joins/changes their server.
-# Can be disabled by changing announce_server_change to false in /usr/local/etc/wemux.conf
+# Can be disabled by changing announce_server_change to false in the config file.
 # Change server name for server, or display server name if no argument is given.
 change_server() {
   if [ "$allow_server_change" == "true" ]; then
@@ -375,7 +379,7 @@ display_version() {
   echo "To check for a newer version visit: http://www.github.com/zolrath/wemux"
 }
 
-# Host mode, used when user is listed in the host_list array in /usr/local/etc/wemux.conf
+# Host mode, used when user is listed in the host_list array in the config file.
 host_mode() {
   # Start the server if it doesn't exist, otherwise reattach.
   start_server() {
@@ -505,7 +509,7 @@ host_mode() {
       status_users)   status_users;;
       display_users)  display_users;;
       version|v)      display_version;;
-      conf*|c)        $editor /usr/local/etc/wemux.conf;;
+      conf*|c)        $editor $config_file;;
       *)              if ! $wemux "$@"; then
                         echo "To see a list of wemux commands enter 'wemux help'"
                         exit 127
@@ -514,7 +518,7 @@ host_mode() {
   fi
 }
 
-# Client Mode, used when user is NOT listed in the host_list in /usr/local/etc/wemux.conf
+# Client Mode, used when user is NOT listed in the host_list in config file.
 client_mode() {
   # Mirror mode, allows the user to view wemux server in read only mode.
   mirror_mode() {
