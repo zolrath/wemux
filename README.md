@@ -59,7 +59,9 @@ and notifications when users attach/detach.
 
     ln -s /usr/local/share/wemux/wemux /usr/local/bin/wemux
 
-  **IMPORTANT**: Copy the `wemux.conf.example` file to `/usr/local/etc/wemux.conf`
+  **IMPORTANT**: By default, `wemux` looks for its configuration at
+  `/usr/local/etc/wemux.conf`. You could overwrite this by setting the
+  $WEMUX_CONFIG environment variable. To copy the example configuration:
 
     cp /usr/local/share/wemux/wemux.conf.example /usr/local/etc/wemux.conf
 
