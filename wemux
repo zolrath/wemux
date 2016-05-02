@@ -9,8 +9,8 @@
 # in another window (separate cursors) in the hosts tmux session.
 #
 # To set a user as host add their username to the host_list in the configuration
-# file located at /usr/local/etc/wemux.conf
-# Other configuations options are also located in /usr/local/etc/wemux.conf
+# file located at /usr/local/etc/wemux.conf or /etc/wemux/wemux.conf
+# Other configuations options are also in the configuration file
 #
 # For environments with multiple hosts running their own independent servers
 # on the same machine wemux can join different servers with the wemux join
@@ -43,14 +43,16 @@
 ###############################################################################
 
 # Current wemux version.
-version="3.2.0"
+version="3.2.1"
 
 # Setup and Configuration Files.
-# Default settings, modify them in the /usr/local/etc/wemux.conf file:
+# Default settings, modify them in configuration file:
 host_list=(change_this_in_wemux_conf)
 host_groups=()
 socket_prefix="/tmp/wemux"
 options="-u"
+allow_user_config="false"
+restrict_pair_mode="true"
 allow_pair_mode="true"
 allow_rogue_mode="true"
 default_client_mode="mirror"
@@ -67,8 +69,14 @@ username=`whoami`
 # Set $EDITOR default to vi if not configured on host machine.
 editor=${EDITOR:="vi"}
 
-# Load configuration options from /usr/local/etc/wemux.conf
+# Load configuration options from the config file
+[ -f /etc/wemux/wemux.conf ] && . /etc/wemux/wemux.conf
 [ -f /usr/local/etc/wemux.conf ] && . /usr/local/etc/wemux.conf
+
+# Load configuration options from USER config file
+if [ "$allow_user_config" == "true" ]; then
+  [ -f $HOME/.config/wemux.conf ] && . $HOME/.config/wemux.conf
+fi
 
 # Sanitize server name, replace spaces and underscores with dashes.
 # Remove all non alpha-numeric characters, convert to lowercase.
@@ -333,7 +341,7 @@ announce_connection() {
 }
 
 # Announces when a user joins/changes their server.
-# Can be disabled by changing announce_server_change to false in /usr/local/etc/wemux.conf
+# Can be disabled by changing announce_server_change to false in the configuration file
 # Change server name for server, or display server name if no argument is given.
 change_server() {
   if [ "$allow_server_change" == "true" ]; then
@@ -375,7 +383,7 @@ display_version() {
   echo "To check for a newer version visit: http://www.github.com/zolrath/wemux"
 }
 
-# Host mode, used when user is listed in the host_list array in /usr/local/etc/wemux.conf
+# Host mode, used when user is listed in the host_list array in the configuration file
 host_mode() {
   # Start the server if it doesn't exist, otherwise reattach.
   start_server() {
@@ -401,6 +409,10 @@ host_mode() {
   kick_user() {
     if [ "$allow_kick_user" == "true" ]; then
       kicked_user=$1
+      # Prevent user from interacting again
+      if [ "$restrict_pair_mode" == "true" ]; then
+        cat ${socket}.lst 2>/dev/null | grep -v "^${kicked_user}$" | tee ${socket}.lst >/dev/null
+      fi
       echo "Kicking $kicked_user from the server. Sudo required."
       # Get sshd process with users name and get its PID.
       user_pid=`sudo lsof -t -u $kicked_user -c sshd -a`
@@ -415,6 +427,24 @@ host_mode() {
       fi
     else
       echo "Kicking users has been disabled."
+    fi
+  }
+
+  # Set user to paired mode
+  pair_user() {
+    if [ "$allow_pair_mode" == "true" ]; then
+      paired_user=$1
+      if [ "$restrict_pair_mode" == "true" ]; then
+        privilege=`grep -o "^${paired_user}$" "${socket}.lst" 2>/dev/null`
+        if [ -z "$privilege" ]; then
+          echo "Granting interaction privileges to $paired_user."
+          kick_user $paired_user
+          echo "$paired_user" >> ${socket}.lst
+          echo "Waiting for $paired_user to reconnect..."
+        else
+          echo "User $paired_user already has interaction privileges"
+        fi
+      fi
     fi
   }
 
@@ -472,6 +502,9 @@ host_mode() {
     if [ "$allow_user_list" == "true" ]; then
       echo "    [u]       users: List all users currently attached to '$server'"
     fi
+    if [ "$restrict_pair_mode" == "true" ]; then
+      echo "               pair: Grant user interaction privileges."
+    fi
     if [ "$allow_kick_user" == "true" ]; then
       echo "               kick: Disconnect an SSH user, remove their wemux server."
     fi
@@ -501,6 +534,7 @@ host_mode() {
       summon_all)     summon_all_users;;
       setmirrored)    mirror_all_users;;
       togglemirrored) mirror_toggle;;
+      pair)           pair_user $2;;
       kick)           kick_user $2;;
       status_users)   status_users;;
       display_users)  display_users;;
@@ -514,7 +548,7 @@ host_mode() {
   fi
 }
 
-# Client Mode, used when user is NOT listed in the host_list in /usr/local/etc/wemux.conf
+# Client Mode, used when user is NOT listed in the host_list in the configuration file
 client_mode() {
   # Mirror mode, allows the user to view wemux server in read only mode.
   mirror_mode() {
@@ -528,6 +562,15 @@ client_mode() {
 
   # Pair mode, allows user to interact with wemux server.
   pair_mode() {
+    if [ "$restrict_pair_mode" == "true" ]; then
+      approved=$(grep -o "^${USER}$" "${socket}.lst" 2>/dev/null);
+      if [ -z "$approved" ]; then
+        allow_pair_mode="false"
+        echo "Pair mode is disabled."
+        mirror_mode
+      fi
+    fi
+
     if [ "$allow_pair_mode" == "true" ]; then
       if session_exists; then
         $wemux attach -t $server
@@ -746,6 +789,7 @@ elif [[ $@ == "help" ]] || [[ $@ == "h" ]]; then
   echo "          summonall: Summon all users to your current session."
   echo "        setmirrored: Set all users to mirror mode to your current session."
   echo "     togglemirrored: Toggle users between mirror/pair mode."
+  echo "        pair [user]: Grant specified user interaction privileges."
   echo "        kick [user]: Kick specified user from the server."
   echo ""
   echo "GENERAL COMMANDS:"
