@@ -1,5 +1,5 @@
 ## wemux Configuration:
-## wemux version 3.2.0
+## wemux version 3.2.1
 ##
 ## Uncomment an option (remove the # in front of it) if you would like to change
 ## the option from its default setting.
@@ -10,9 +10,16 @@
 ## them to create wemux servers for other users to attach to.
 ## Add the usernames of users who should use wemux in host mode:
 ## example: host_list=(zolrath csagan brocksamson)
+# host_list=(root wemux)
 
 ## All users in any of the groups in host_groups will also use wemux in host mode.
 ## example: host_groups=(wheel wemux)
+
+## Allows host to restrict users to attach to the wemux server in paid mode.
+## Automatically disabled if allow_pair_mode="false"
+## When set to false, all clients will be able to attach in pair mode.
+## Defaults to "true"
+# restrict_pair_mode="false"
 
 ####### CLIENT OPTIONS #######
 
@@ -70,6 +77,10 @@
 # announce_server_change="false"
 
 ####### OTHER OPTIONS #######
+
+## Allow loading a custom config file ($HOME/.config/wemux.conf)
+## Defaults to "false"
+# allow_user_config="true"
 
 ## Location of tmux socket, will have server name appended to end:
 ## Defaults to "/tmp/wemux"
