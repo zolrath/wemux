@@ -124,6 +124,18 @@ and notifications when users attach/detach.
   `wemux list-sessions` is equivalent to entering `tmux -S /tmp/wemux-wemux
   list-sessions`
 
+####  wemux client < command >
+When you found unknown client command for user in `host_list` configuration. You need to tell
+`wemux` run  as client - [Issue #39](https://github.com/zolrath/wemux/issues/39#issuecomment-37991293)
+
+```sh
+ $ wemux rogue
+ unknown command: rogue
+ To see a list of wemux commands enter 'wemux help'
+
+ $ wemux client rogue # work for user in host_list
+ ```
+
 ## User List
   wemux can display a list of connected users, indicating users in mirror mode
   with [m] at the end of their name.
