@@ -116,6 +116,10 @@ and notifications when users attach/detach.
   * If both rogue and pair mode are disabled, it will attach in mirror mode.
   * By setting `default_client_mode="rogue"` in `wemux.conf` this can be changed
   to always join in rogue mode, even if a rogue session doesn't already exist.
+  * If a user is in the host_list and you'd like them to also be able to be a 
+  client, using `wemux client <command>` will run the command as if they were a 
+  regular client. For example, if you typically host, but want to join a session
+  as a rogue client, `wemux client rogue` will work.
 
 #### Other Commands
   wemux passes commands it doesn't understand through to tmux with the correct
