@@ -86,8 +86,8 @@ and notifications when users attach/detach.
 #### wemux kick *username*
   Use `wemux kick <username>` to kick an SSH user from the server and remove
   their wemux rogue sessions.
-#### wemux config
-  Use `wemux config` to open `/usr/local/etc/wemux.conf` in your $EDITOR.
+#### wemux conf
+  Use `wemux conf` to open `/usr/local/etc/wemux.conf` in your $EDITOR.
   Note this only works if you have the environment variable EDITOR configured.
 #### wemux
   When `wemux` is run without any arguments in host mode, it is just like
@@ -238,7 +238,7 @@ and notifications when users attach/detach.
   There are a number of additional options that be configured in
   `/usr/local/etc/wemux.conf`.  In most cases the only option that must be changed is the
   `host_list` array. To open your wemux configuration file, you can either open
-  `/usr/local/etc/wemux.conf` manually or run `wemux config`
+  `/usr/local/etc/wemux.conf` manually or run `wemux conf`
 
 ### Host Mode
   To have an account act as host, ensure that you have added their username to the
