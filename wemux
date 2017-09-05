@@ -382,7 +382,7 @@ host_mode() {
     if ! session_exists; then
       $wemux new-session -d -s $server
       # Open tmux socket to all users to allow clients to connect.
-      chmod 1777 $socket
+      chmod +trwx $socket
       echo "wemux server started on '$server'."
     fi
     reattach
