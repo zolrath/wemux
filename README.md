@@ -81,8 +81,11 @@ and notifications when users attach/detach.
 #### wemux attach
   Use `wemux attach` to attach to an existing wemux server.
 #### wemux stop
-  Use `wemux stop` to kill the wemux server and remove the /tmp/wemux-wemux
+  Use `wemux stop` to stop the wemux server and remove the /tmp/wemux-wemux
   socket.
+#### wemux kill
+  Use `wemux kill` to stop the wemux server and forcibly remove the 
+  /tmp/wemux-wemux socket (using sudo).
 #### wemux kick *username*
   Use `wemux kick <username>` to kick an SSH user from the server and remove
   their wemux rogue sessions.
