@@ -20,6 +20,7 @@
 # wemux start : Start the wemux server/join an existing wemux server.
 # wemux attach: Join an existing wemux server.
 # wemux stop  : Stop the wemux server.
+# wemux kill  : Stop the wemux server, forcibly killing the socket (with sudo).
 # wemux users : List the currently attached wemux users.
 # wemux kick  : Disconnect an SSH user, remove their wemux server.
 # wemux config: Open the wemux configuration file in your $EDITOR.
@@ -377,6 +378,23 @@ display_version() {
 
 # Host mode, used when user is listed in the host_list array in /usr/local/etc/wemux.conf
 host_mode() {
+  # Sets server and socket vars by a server's name or list number (specified as args)
+  get_server_socket() {
+    server_sockets=(`echo $socket_prefix*`)
+    # If a specific server is supplied:
+    if [ $1 ]; then
+      # If user enters a number, get the server with that number in `wemux list`
+      if [[ $@ =~ ^[0-9]+$ ]]; then
+        socket=${server_sockets[$1-1]}
+        server=`echo $socket | sed -e "s,$socket_prefix-,,g"`
+      # Otherwise, get the server with the supplied name.
+      else
+        server=`sanitize_server_name $@`
+        socket="$socket_prefix-$server"
+      fi
+    fi
+  }
+
   # Start the server if it doesn't exist, otherwise reattach.
   start_server() {
     if ! session_exists; then
@@ -418,21 +436,20 @@ host_mode() {
     fi
   }
 
-  # Stop the wemux session and remove the socket file.
-  stop_server() {
-    server_sockets=(`echo $socket_prefix*`)
-    # If a specific server is supplied:
-    if [ $1 ]; then
-      # If user enters a number, stop the server with that number in `wemux list`
-      if [[ $@ =~ ^[0-9]+$ ]]; then
-        socket=${server_sockets[$1-1]}
-        server=`echo $socket | sed -e "s,$socket_prefix-,,g"`
-      # Otherwise, stop the server with the supplied name.
-      else
-        server=`sanitize_server_name $@`
-        socket="$socket_prefix-$server"
+  # Attempt to take ownership of the server socket
+  steal_socket() {
+    get_server_socket "$@"
+    # If the socket file exists:
+    if [ -e "$socket" ]; then
+      if ! sudo chown $username $socket; then
+        echo "Could not assume ownership of '$socket'."
       fi
     fi
+  }
+
+  # Stop the wemux session and remove the socket file.
+  stop_server() {
+    get_server_socket "$@"
     # If the user doesn't pass an argument, stop current server.
     if kill_server_successful; then
       echo "wemux server on '$server' stopped."
@@ -459,7 +476,8 @@ host_mode() {
     echo ""
     echo "    [s]       start: Start the wemux server/attach to an existing wemux server."
     echo "    [a]      attach: Attach to an existing wemux server."
-    echo "    [k]        stop: Kill the wemux server '$server', delete its socket."
+    echo "    [st]       stop: Stop the wemux server '$server', delete its socket."
+    echo "    [k]        kill: Kill the wemux server '$server', forcibly delete its socket (with sudo)."
     echo ""
     if [ "$allow_server_change" == "true" ]; then
       echo "    [j] join [name]: Join the specified wemux server."
@@ -490,7 +508,7 @@ host_mode() {
       start|s)        announce_connection "host" start_server;;
       attach|a)       announce_connection "host" reattach;;
       stop|st)        shift; stop_server "$@";;
-      kill|k)         shift; stop_server "$@";;
+      kill|k)         shift; steal_socket "$@"; stop_server "$@";;
       help|h)         display_host_commands;;
       join|j)         shift; change_server "$@";;
       name|n)         shift; change_server "$@";;

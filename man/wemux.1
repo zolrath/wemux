@@ -22,6 +22,9 @@ WEMUX HOST COMMANDS
 \fBwemux stop\fR
 .
 .br
+\fBwemux kill\fR
+.
+.br
 \fBwemux users\fR
 .
 .br
@@ -83,7 +86,10 @@ Start a wemux session, chmod /tmp/wemux\-wemux to 1777 so that other users may c
 Attach to an existing wemux session\.
 .
 .SS "wemux stop"
-Kill the wemux session and remove the /tmp/wemux\-wemux socket\.
+Stop the wemux session and remove the /tmp/wemux\-wemux socket\.
+.
+.SS "wemux kill"
+Stop the wemux session and forcibly remove the /tmp/wemux\-wemux socket (using sudo)\.
 .
 .SS "wemux kick <var>username</var>"
 Kick an SSH user from the server and remove their wemux pair sessions\.
