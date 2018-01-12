@@ -141,13 +141,13 @@ list_active_servers() {
       fi
     # allow_server_list is disabled:
     else
-      echo "Server listing has been disabled."
-      return 126
+      >&2 echo "Server listing has been disabled."
+      exit 126
     fi
   # allow_server_change is disabled:
   else
-    echo "Server related commands have been disabled."
-    return 126
+    >&2 echo "Server related commands have been disabled."
+    exit 126
   fi
 }
 
@@ -169,8 +169,8 @@ status_users() {
     # Strip last two characters ', '
     echo "${users%??}"
   else
-    echo "User list disabled."
-    return 126
+    >&2 echo "User list disabled."
+    exit 126
   fi
 }
 
@@ -363,8 +363,8 @@ change_server() {
         "$username has joined this server" 2>&1`
     fi
   else
-    echo "Changing wemux servers has been disabled."
-    return 126
+    >&2 echo "Changing wemux servers has been disabled."
+    exit 126
   fi
   return 0
 }
@@ -507,7 +507,7 @@ host_mode() {
       version|v)      display_version;;
       conf*|c)        $editor /usr/local/etc/wemux.conf;;
       *)              if ! $wemux "$@"; then
-                        echo "To see a list of wemux commands enter 'wemux help'"
+                        >&2 echo "To see a list of wemux commands enter 'wemux help'"
                         exit 127
                       fi;;
     esac
@@ -521,8 +521,8 @@ client_mode() {
     if session_exists; then
       $wemux attach -t $server -r
     else
-      echo "No wemux server to mirror on '$server'."
-      return 126
+      >&2 echo "No wemux server to mirror on '$server'."
+      exit 126
     fi
   }
 
@@ -536,8 +536,8 @@ client_mode() {
         return 126
       fi
     else
-      echo "Pair mode is disabled."
-      return 126
+      >&2 echo "Pair mode is disabled."
+      exit 126
     fi
   }
 
@@ -554,12 +554,12 @@ client_mode() {
         $wemux send-keys -t $client_session $@
         $wemux attach -t $client_session
       else
-        echo "No wemux server to go 'rogue' with on '$server'."
-        return 126
+        >&2 echo "No wemux server to go 'rogue' with on '$server'."
+        exit 126
       fi
     else
-      echo "Rogue mode is disabled."
-      return 126
+      >&2 echo "Rogue mode is disabled."
+      exit 126
     fi
   }
 
@@ -572,12 +572,12 @@ client_mode() {
         $wemux kill-session -t $client_session
         echo "Logged out of rogue mode on '$server'."
       else
-        echo "No wemux server to log out of on '$server'."
-        return 126
+        >&2 echo "No wemux server to log out of on '$server'."
+        exit 126
       fi
     else
-      echo "Rogue mode is disabled."
-      return 126
+      >&2 echo "Rogue mode is disabled."
+      exit 126
     fi
   }
 
@@ -603,8 +603,8 @@ client_mode() {
     elif session_exists; then
       announce_connection "mirror" $wemux attach -t $server -r
     else
-      echo "No wemux server to attach to on '$server'"
-      return 126
+      >&2 echo "No wemux server to attach to on '$server'"
+      exit 126
     fi
   }
 
@@ -681,7 +681,7 @@ client_mode() {
       version|v)     display_version;;
       send)          send $@;;
       *)             if ! $wemux "$@"; then
-                       echo "To see a list of wemux commands enter 'wemux help'"
+                       >&2 echo "To see a list of wemux commands enter 'wemux help'"
                        exit 127
                      fi;;
     esac
