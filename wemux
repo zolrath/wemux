@@ -69,6 +69,7 @@ editor=${EDITOR:="vi"}
 
 # Load configuration options from /usr/local/etc/wemux.conf
 [ -f /usr/local/etc/wemux.conf ] && . /usr/local/etc/wemux.conf
+[ -f $HOME/etc/wemux.conf ] && . $HOME/etc/wemux.conf
 
 # Sanitize server name, replace spaces and underscores with dashes.
 # Remove all non alpha-numeric characters, convert to lowercase.
