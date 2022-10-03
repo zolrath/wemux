@@ -26,6 +26,12 @@
 ## Defaults to "true"
 # allow_rogue_mode="false"
 
+## When new users connect using `wemux rogue`, give them
+## a new window. This can be disorienting for new users, especially when
+## you asked them to connect to your session to show them something.
+## Defaults to "false"
+# spawn_window_on_rogue_connect="true"
+
 ## When clients enter 'wemux' with no arguments by default it will attempt to
 ## join an existing pair mode session, if there is no pair session it will start
 ## a mirror mode session.

@@ -53,6 +53,7 @@ socket_prefix="/tmp/wemux"
 options="-u"
 allow_pair_mode="true"
 allow_rogue_mode="true"
+spawn_window_on_rogue_connect="false"
 default_client_mode="mirror"
 allow_kick_user="true"
 allow_server_change="false"
@@ -550,7 +551,9 @@ client_mode() {
         $wemux attach -t $client_session
       elif session_exists; then
         $wemux new-session -d -t $server -s $client_session
-        $wemux new-window -n $username
+        if [ "$spawn_window_on_rogue_connect" == "true" ]; then
+          $wemux new-window -n $username
+        fi
         $wemux send-keys -t $client_session $@
         $wemux attach -t $client_session
       else
